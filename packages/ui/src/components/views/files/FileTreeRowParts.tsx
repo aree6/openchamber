@@ -16,7 +16,7 @@ export const FileTreeIndentGuides: React.FC<{ depth: number }> = ({ depth }) => 
       <span
         key={level}
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 w-px bg-border/50"
+        className="pointer-events-none absolute inset-y-0 w-px bg-edge"
         style={{ insetInlineStart: `${FILE_TREE_BASE_PADDING_PX + level * FILE_TREE_INDENT_PX + 7}px` }}
       />
     ))}

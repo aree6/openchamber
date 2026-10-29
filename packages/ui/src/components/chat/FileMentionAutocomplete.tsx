@@ -28,6 +28,7 @@ import { rankSessionMentions } from './sessionMentionResults';
 import type { Session } from '@/lib/opencode/model';
 import { ensureGlobalSessionsLoaded, resolveGlobalSessionDirectory, useGlobalSessionsStore } from '@/stores/useGlobalSessionsStore';
 import { useAutocompleteSelectionScroll } from './composer/ui/useAutocompleteSelectionScroll';
+import { useHeightMorph } from '@/lib/motion/useSizeMorph';
 
 /** Subagents listed before the user types; the rest are a keystroke away. */
 const AGENTS_SHOWN_WITHOUT_QUERY = 6;
@@ -126,6 +127,9 @@ export const FileMentionAutocomplete = React.forwardRef<FileMentionHandle, FileM
   const labelRefs = React.useRef<(HTMLSpanElement | null)[]>([]);
   const measureRefs = React.useRef<(HTMLSpanElement | null)[]>([]);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  // Narrowing as the user types, the box eases into its new height; its
+  // bottom edge stays on the composer (`bottom-full`), so it moves upward.
+  useHeightMorph(containerRef);
   const isMobile = useUIStore((state) => state.isMobile);
   // A caret placement brings its own max-height.
   const mobileMaxHeight = useMobileAutocompleteMaxHeight(containerRef, style?.maxHeight === undefined);
@@ -573,7 +577,7 @@ export const FileMentionAutocomplete = React.forwardRef<FileMentionHandle, FileM
               </div>
             )}
             {visibleAgents.length > 0 && (visibleRecentFiles.length > 0 || visibleResults.length > 0 || visibleSessions.length > 0) && (
-              <div className="my-1 border-t border-border/60" />
+              <div className="my-1 border-t border-edge" />
             )}
             {visibleRecentFiles.map((file, index) => {
               const rowIndex = visibleAgents.length + index;
@@ -627,7 +631,7 @@ export const FileMentionAutocomplete = React.forwardRef<FileMentionHandle, FileM
               );
             })}
             {visibleRecentFiles.length > 0 && visibleResults.length > 0 && (
-              <div className="my-1 border-t border-border/60" />
+              <div className="my-1 border-t border-edge" />
             )}
             {visibleResults.map((file, index) => {
               const rowIndex = visibleAgents.length + visibleRecentFiles.length + index;
@@ -688,7 +692,7 @@ export const FileMentionAutocomplete = React.forwardRef<FileMentionHandle, FileM
               );
             })}
             {visibleSessions.length > 0 && (visibleRecentFiles.length > 0 || visibleResults.length > 0) && (
-              <div className="my-1 border-t border-border/60" />
+              <div className="my-1 border-t border-edge" />
             )}
             {/* After the files: Enter on `@pack` keeps choosing the file it always did. */}
             {visibleSessions.map((session, index) => {

@@ -64,7 +64,7 @@ Access tokens never appear here or in a `request` result.
 | `stat(path)` | `{ kind, size, mtime }`, `kind` is `file`, `directory`, `other`, or `missing`. |
 | `generate({ prompt, system?, maxOutputTokens? })` | one-off text from the user's Small Model. Returns `{ text }`. Needs the `model` capability. |
 | `onResolve(handler)` | register the handler for your slash commands. It gets `{ command, args }` and returns an attach item or `null`. |
-| `setBadge(count)` | show a number (0 to 999) on your rail icon, or `null` to clear it |
+| `setBadge(count)` | mark your rail icon with a dot and put the count (0 to 999) in its tooltip, or `null` to clear it |
 | `openCommit(sha)` | open the Diff view on that commit of the current project. `sha` is 7 to 64 hex characters; OpenChamber reads the commit itself. |
 | `setHeight(px)` | set the height of your Work Status section. OpenChamber keeps it between 24 and 320 pixels; taller content scrolls inside your page. Other places ignore it. |
 | `onFileOpen(listener)` | file editors: get the file to edit, `{ path, name, readOnly }` plus `encoding: "text"` with `content`, or `encoding: "binary"` with `bytes`. Also makes Cmd/Ctrl+S in your page save. |

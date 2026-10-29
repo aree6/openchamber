@@ -370,11 +370,11 @@ const TimelineDialogBody: React.FC<TimelineDialogBodyProps> = ({
                                 <React.Fragment key={message.info.id}>
                                     {showDateGroup && (
                                         <div className="sticky top-0 z-10 flex items-center gap-3 bg-background/95 py-2 backdrop-blur-sm">
-                                            <div className="h-px flex-1 bg-border/60" />
+                                            <div className="h-px flex-1 bg-edge" />
                                             <span className="typography-meta text-muted-foreground">
                                                 {dateGroup}
                                             </span>
-                                            <div className="h-px flex-1 bg-border/60" />
+                                            <div className="h-px flex-1 bg-edge" />
                                         </div>
                                     )}
                                     <div
@@ -452,7 +452,7 @@ const TimelineDialogBody: React.FC<TimelineDialogBodyProps> = ({
                 </div>
 
                 {isMobile ? (
-                    <div className="mt-2 flex shrink-0 items-center justify-center gap-2 border-t border-border/60 pt-2">
+                    <div className="mt-2 flex shrink-0 items-center justify-center gap-2 border-t border-edge pt-2">
                         {turnActions}
                     </div>
                 ) : (

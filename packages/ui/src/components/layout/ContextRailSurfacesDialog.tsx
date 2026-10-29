@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useGuestSurfaces } from '@/hooks/useGuestSurfaces';
-import { sortContextSurfaces } from '@/lib/surfaces/registry';
+import { contextSurfaceGroup, sortContextSurfaces } from '@/lib/surfaces/registry';
 
 /**
  * Which surfaces the context rail shows. Everything is on by default and the
@@ -44,15 +44,20 @@ export const ContextRailSurfacesDialog: React.FC<{
   const allVisible = hidden.length === 0;
   const noneVisible = surfaces.every((surface) => hidden.includes(surface.id));
   const dragging = React.useRef(false);
-  const items = React.useMemo(() => surfaces.map((surface) => ({
+  const items = React.useMemo(() => surfaces.map((surface, index) => ({
     id: surface.id,
     label: surface.label ?? t(surface.labelKey),
     visible: !hidden.includes(surface.id),
+    groupStart: index > 0 && contextSurfaceGroup(surfaces[index - 1]) !== contextSurfaceGroup(surface),
   })), [hidden, surfaces, t]);
+  // The rail's groups stay together: a surface dropped inside its own group
+  // moves there, and one dropped ahead of another group carries its whole
+  // group along (sortContextSurfaces). The saved order is that grouped order.
   const handleReorder = (next: string[]) => {
-    const shown = new Set<string>(next);
+    const grouped = sortContextSurfaces(next, guestSurfaces).map((surface) => surface.id).filter((id) => next.includes(id));
+    const shown = new Set<string>(grouped);
     // Keep saved entries for extensions that are temporarily unavailable.
-    setSurfaceOrder([...next, ...contextRailOrder.filter((id) => !shown.has(id))]);
+    setSurfaceOrder([...grouped, ...contextRailOrder.filter((id) => !shown.has(id))]);
   };
 
   return (

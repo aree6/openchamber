@@ -1,4 +1,7 @@
 import React from 'react';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/shortcuts';
 
 import { FileTypeIcon } from '@/components/icons/FileTypeIcon';
 import { DiffViewIcon } from '@/components/icons/DiffIcon';
@@ -419,6 +422,7 @@ export const ContextPanel: React.FC<{ zone?: ContextZone }> = ({ zone = 'right' 
 
   const panelState = useUIStore((state) => (directoryKey ? state.contextPanelByDirectory[directoryKey] : undefined));
   const placement = useUIStore((state) => state.contextSurfaceZones);
+  const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
   const closeContextZone = useUIStore((state) => state.closeContextZone);
   const closeContextPanelTab = useUIStore((state) => state.closeContextPanelTab);
   const pinContextPanelTab = useUIStore((state) => state.pinContextPanelTab);
@@ -1052,17 +1056,21 @@ export const ContextPanel: React.FC<{ zone?: ContextZone }> = ({ zone = 'right' 
           );
         }) : null}
         {!isTreeOnly ? (
+          <Tooltip>
+          <TooltipTrigger asChild>
           <Button
             type="button"
             variant="ghost"
             size="sm"
             onClick={handleToggleExpanded}
             className="h-7 w-7 p-0"
-            title={isExpanded ? t('contextPanel.actions.collapsePanel') : t('contextPanel.actions.expandPanel')}
             aria-label={isExpanded ? t('contextPanel.actions.collapsePanel') : t('contextPanel.actions.expandPanel')}
           >
             {isExpanded ? <Icon name="fullscreen-exit" className="h-3.5 w-3.5" /> : <Icon name="fullscreen" className="h-3.5 w-3.5" />}
           </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={6}><TooltipLabelWithShortcut label={isExpanded ? t('contextPanel.actions.collapsePanel') : t('contextPanel.actions.expandPanel')} shortcut={activeTab?.mode === 'terminal' ? formatShortcutForDisplay(getEffectiveShortcutCombo('toggle_terminal_expanded', shortcutOverrides), '') : undefined} /></TooltipContent>
+          </Tooltip>
         ) : null}
         <Button
           type="button"

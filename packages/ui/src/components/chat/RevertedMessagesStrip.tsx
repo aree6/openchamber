@@ -109,7 +109,7 @@ export const RevertedMessagesStrip: React.FC<RevertedMessagesStripProps> = React
 
     if (items.length === 1) {
         return (
-            <div role="group" className={`${ROW_CLASS} border-b border-border/60`} aria-label={t('chat.revertPopover.title')}>
+            <div role="group" className={`${ROW_CLASS} border-b border-edge`} aria-label={t('chat.revertPopover.title')}>
                 <Icon name="arrow-go-back" className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">{items[0].text}</span>
                 {restoreButton}
@@ -123,7 +123,7 @@ export const RevertedMessagesStrip: React.FC<RevertedMessagesStripProps> = React
     // The header toggles the list, as the background commands header does;
     // Restore stays on it, so the decision never hides behind the toggle.
     return (
-        <div role="group" className="border-b border-border/60" aria-label={t('chat.revertPopover.title')}>
+        <div role="group" className="border-b border-edge" aria-label={t('chat.revertPopover.title')}>
             <div className="flex oc-composer-row items-center gap-2 ps-3 pe-1.5">
                 <Button
                     type="button"

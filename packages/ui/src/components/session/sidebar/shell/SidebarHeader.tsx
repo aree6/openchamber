@@ -1,4 +1,6 @@
 import React from 'react';
+import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/shortcuts';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +20,6 @@ import { useSessionMultiSelectStore } from '@/stores/useSessionMultiSelectStore'
 import { useI18n, type I18nKey } from '@/lib/i18n';
 import { updateDesktopSettings } from '@/lib/persistence';
 import { SessionSearchInput } from '@/components/session/SessionSearchInput';
-import { Button } from '@/components/ui/button';
 import { GuestIcon } from '@/components/layout/GuestRailIcon';
 import { useGuestPages } from '@/hooks/useGuestSurfaces';
 import { guestPackageIconSrc, resolveGuestIconName } from '@/lib/guests/icon';
@@ -46,78 +47,12 @@ type Props = {
   searchMatchCount: number;
   collapseAll: () => void;
   expandAll: () => void;
+  /** The usage stats page, which the app's own runtimes offer. */
+  showStats: boolean;
 };
-
-/**
- * Whether every extension page gets its own button next to the built-in pages
- * without pushing into the list controls. All or nothing: once they stop
- * fitting, they all move into one menu, so a page never hops between the row
- * and the menu as the sidebar resizes. The measured parts don't change with
- * the answer, so it cannot flip back and forth on its own.
- */
-function useGuestPagesFitInline(
-  rowRef: React.RefObject<HTMLDivElement | null>,
-  builtinPagesRef: React.RefObject<HTMLDivElement | null>,
-  listControlsRef: React.RefObject<HTMLDivElement | null>,
-  count: number,
-): boolean {
-  const [fits, setFits] = React.useState(true);
-  React.useLayoutEffect(() => {
-    const row = rowRef.current;
-    const builtinPages = builtinPagesRef.current;
-    const listControls = listControlsRef.current;
-    if (!row || !builtinPages || !listControls || count === 0) return;
-    const measure = () => {
-      const button = builtinPages.lastElementChild;
-      const buttonWidth = button ? button.getBoundingClientRect().width : 0;
-      const gap = Number.parseFloat(getComputedStyle(builtinPages).columnGap) || 0;
-      const rowGap = Number.parseFloat(getComputedStyle(row).columnGap) || 0;
-      const needed = builtinPages.getBoundingClientRect().width + count * (gap + buttonWidth);
-      const available = row.getBoundingClientRect().right - builtinPages.getBoundingClientRect().left
-        - listControls.getBoundingClientRect().width - rowGap;
-      setFits(needed <= available);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(row);
-    observer.observe(builtinPages);
-    observer.observe(listControls);
-    return () => observer.disconnect();
-  }, [rowRef, builtinPagesRef, listControlsRef, count]);
-  return fits;
-}
 
 const PRESSED_PAGE_BUTTON_CLASS = 'bg-interactive-selection text-interactive-selection-foreground hover:bg-interactive-selection hover:text-interactive-selection-foreground';
 const IDLE_PAGE_BUTTON_CLASS = 'text-muted-foreground hover:text-foreground hover:bg-transparent';
-
-/**
- * A page the sidebar opens in the main area. The button stays pressed while
- * its page is open, and the same click closes the page again.
- */
-function SidebarPageButton({ label, pressed, onClick, className, children }: {
-  label: string;
-  pressed: boolean;
-  onClick: () => void;
-  className: string;
-  children: React.ReactNode;
-}): React.ReactNode {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={onClick}
-          className={cn(className, pressed ? PRESSED_PAGE_BUTTON_CLASS : IDLE_PAGE_BUTTON_CLASS)}
-          aria-label={label}
-          aria-pressed={pressed}
-        >
-          {children}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="bottom" sideOffset={4}><p>{label}</p></TooltipContent>
-    </Tooltip>
-  );
-}
 
 export function SidebarHeader(props: Props): React.ReactNode {
   const { t } = useI18n();
@@ -140,12 +75,8 @@ export function SidebarHeader(props: Props): React.ReactNode {
     searchMatchCount,
     collapseAll,
     expandAll,
+    showStats,
   } = props;
-
-  const rowRef = React.useRef<HTMLDivElement>(null);
-  const builtinPagesRef = React.useRef<HTMLDivElement>(null);
-  const listControlsRef = React.useRef<HTMLDivElement>(null);
-  const guestPagesInline = useGuestPagesFitInline(rowRef, builtinPagesRef, listControlsRef, guestPages.length);
 
   const selectionModeEnabled = useSessionMultiSelectStore((state) => state.enabled);
   const toggleSelectionMode = useSessionMultiSelectStore((state) => state.toggleMode);
@@ -156,10 +87,9 @@ export function SidebarHeader(props: Props): React.ReactNode {
   const isScheduledOpen = useUIStore((state) => state.isScheduledTasksDialogOpen);
   const isArchiveOpen = useUIStore((state) => state.isArchivePageOpen);
   const isIntegrationsCatalogOpen = useUIStore((state) => state.isIntegrationsCatalogOpen);
-  // The bundled catalog offers outside services; enterprise mode waits for
-  // administrator-curated sources instead.
   const enterpriseMode = useEnterpriseMode();
   const openGuestPageId = useUIStore((state) => state.openGuestPageId);
+  const isUsageOpen = useUIStore((state) => state.isUsageStatsPageOpen);
 
   const showChatsSection = useSessionDisplayStore((state) => state.showChatsSection);
   const setShowChatsSection = useSessionDisplayStore((state) => state.setShowChatsSection);
@@ -299,6 +229,33 @@ export function SidebarHeader(props: Props): React.ReactNode {
     </>);
   }
 
+  // The pages the sidebar opens in the main area, most used first. Each item
+  // is a toggle: it carries a check while its page is open and closes it.
+  const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
+  const sourceBoardShortcut = formatShortcutForDisplay(getEffectiveShortcutCombo('toggle_source_board', shortcutOverrides), '');
+  const ui = useUIStore.getState;
+  const morePageItems: { key: string; label: string; icon: React.ReactNode; open: boolean; onToggle: () => void }[] = [];
+  if (showSourceBoard && overviewAvailable) {
+    morePageItems.push({ key: 'overview', label: t('overview.title'), icon: <Icon name="compass-3" className="h-4 w-4" />, open: isOverviewOpen, onToggle: () => ui().setOverviewOpen(!isOverviewOpen) });
+  }
+  if (showSourceBoard) {
+    morePageItems.push({ key: 'source-board', label: t('sourceBoard.title'), icon: <Icon name="git-pull-request" className="h-4 w-4" />, open: isSourceBoardOpen, onToggle: () => ui().setSourceBoardOpen(!isSourceBoardOpen) });
+  }
+  morePageItems.push(
+    { key: 'scheduled', label: t('sessions.sidebar.header.actions.scheduledTasks'), icon: <Icon name="calendar-schedule" className="h-4 w-4" />, open: isScheduledOpen, onToggle: () => ui().setScheduledTasksDialogOpen(!isScheduledOpen) },
+    { key: 'archive', label: t('sessions.sidebar.nav.archive'), icon: <Icon name="archive" className="h-4 w-4" />, open: isArchiveOpen, onToggle: () => ui().setArchivePageOpen(!isArchiveOpen) },
+  );
+  if (showStats) {
+    morePageItems.push({ key: 'stats', label: t('usageStats.openAction'), icon: <Icon name="bar-chart" className="h-4 w-4" />, open: isUsageOpen, onToggle: () => ui().setUsageStatsPageOpen(!isUsageOpen) });
+  }
+  // The bundled catalog offers outside services; enterprise mode waits for
+  // administrator-curated sources instead.
+  if (!enterpriseMode) {
+    morePageItems.push({ key: 'integrations', label: t('integrationsCatalog.sidebar.open'), icon: <Icon name="store-2" className="h-4 w-4" />, open: isIntegrationsCatalogOpen, onToggle: () => ui().setIntegrationsCatalogOpen(!isIntegrationsCatalogOpen) });
+  }
+  const morePageOpen = morePageItems.some((page) => page.open)
+    || guestPages.some((guest) => guest.id === openGuestPageId);
+
   if (hideDirectoryControls) {
     // VS Code: the sidebar is always a single workspace, so project/directory
     // controls stay hidden, but session search is still useful. Show a compact,
@@ -326,153 +283,108 @@ export function SidebarHeader(props: Props): React.ReactNode {
   return (
     <div className="select-none flex-shrink-0 px-2.5 py-1">
       <div className="flex h-auto min-h-8 flex-col gap-1">
-        {/* h-8 is a minimum, not a fixed height: at a large interface font
-            size the rem-sized buttons no longer fit one row, and the two
-            clusters wrap onto a second line instead of overflowing the
-            sidebar's overflow-x-hidden edge. */}
-        <div ref={rowRef} className="flex min-h-8 flex-wrap items-center justify-between gap-2">
-          {/* Quiet toolbar at the top of the list: the pages the sidebar opens
-              at left, most used first; controls for the list itself at right.
-              ms-[3px] compensates the icon inset inside the 24px buttons so the
-              first glyph sits 16px from the sidebar edge, in line with the
-              titlebar controls. */}
-          <div className="ms-[3px] flex min-w-0 items-center gap-1.5">
-            <div ref={builtinPagesRef} className="flex items-center gap-1.5">
-              {showSourceBoard && overviewAvailable ? (
-                <SidebarPageButton
-                  label={t('overview.title')}
-                  pressed={isOverviewOpen}
-                  onClick={() => useUIStore.getState().setOverviewOpen(!isOverviewOpen)}
-                  className={headerActionButtonClass}
-                >
-                  <Icon name="compass-3" className={headerActionIconClass} />
-                </SidebarPageButton>
-              ) : null}
-
-              {showSourceBoard ? (
-                <SidebarPageButton
-                  label={t('sourceBoard.title')}
-                  pressed={isSourceBoardOpen}
-                  onClick={() => useUIStore.getState().setSourceBoardOpen(!isSourceBoardOpen)}
-                  className={headerActionButtonClass}
-                >
-                  <Icon name="git-pull-request" className={headerActionIconClass} />
-                </SidebarPageButton>
-              ) : null}
-
-              <SidebarPageButton
-                label={t('sessions.sidebar.header.actions.scheduledTasks')}
-                pressed={isScheduledOpen}
-                onClick={() => useUIStore.getState().setScheduledTasksDialogOpen(!isScheduledOpen)}
-                className={headerActionButtonClass}
+        {/* Quiet toolbar at the top of the list: the list's own controls
+            first, then one menu with the pages the sidebar opens. ms-[3px]
+            compensates the icon inset inside the 24px buttons so the first
+            glyph sits 16px from the sidebar edge, in line with the titlebar
+            controls. */}
+        <div className="ms-[3px] flex min-h-8 items-center gap-1.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={isSessionSearchOpen ? closeSessionSearch : openSessionSearch}
+                className={cn(headerActionButtonClass, isSessionSearchOpen ? PRESSED_PAGE_BUTTON_CLASS : IDLE_PAGE_BUTTON_CLASS)}
+                aria-label={t('sessions.sidebar.header.actions.searchSessions')}
+                aria-expanded={isSessionSearchOpen}
               >
-                <Icon name="calendar-schedule" className={headerActionIconClass} />
-              </SidebarPageButton>
+                <Icon name="search" className={headerActionIconClass} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={4}><TooltipLabelWithShortcut label={t('sessions.sidebar.header.actions.searchSessions')} shortcut={formatShortcutForDisplay(getEffectiveShortcutCombo('open_session_list', shortcutOverrides), '')} /></TooltipContent>
+          </Tooltip>
 
-              <SidebarPageButton
-                label={t('sessions.sidebar.nav.archive')}
-                pressed={isArchiveOpen}
-                onClick={() => useUIStore.getState().setArchivePageOpen(!isArchiveOpen)}
-                className={headerActionButtonClass}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={handleOpenDirectoryDialog}
+                className={cn(headerActionButtonClass, IDLE_PAGE_BUTTON_CLASS)}
+                aria-label={t('sessions.sidebar.header.actions.addProject')}
               >
-                <Icon name="archive" className={headerActionIconClass} />
-              </SidebarPageButton>
+                <Icon name="folder-add" className={headerActionIconClass} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.addProject')}</p></TooltipContent>
+          </Tooltip>
 
-              {enterpriseMode ? null : (
-                <SidebarPageButton
-                  label={t('integrationsCatalog.sidebar.open')}
-                  pressed={isIntegrationsCatalogOpen}
-                  onClick={() => useUIStore.getState().setIntegrationsCatalogOpen(!isIntegrationsCatalogOpen)}
-                  className={headerActionButtonClass}
-                >
-                  <Icon name="store-2" className={headerActionIconClass} />
-                </SidebarPageButton>
-              )}
-            </div>
-            {guestPagesInline ? guestPages.map((guest) => {
-              const pressed = openGuestPageId === guest.id;
-              return (
-                <SidebarPageButton
-                  key={guest.id}
-                  label={guest.pageTitle ?? guest.name}
-                  pressed={pressed}
-                  onClick={() => useUIStore.getState().setOpenGuestPage(pressed ? null : guest.id)}
-                  className={headerActionButtonClass}
-                >
-                  <GuestIcon icon={resolveGuestIconName(guest.icon)} iconSrc={guestPackageIconSrc(guest.id, guest.icon, getRuntimeUrlResolver().authenticatedAsset)} className={headerActionIconClass} />
-                </SidebarPageButton>
-              );
-            }) : guestPages.length > 0 && <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="xs" className="w-6 text-muted-foreground" aria-label={t('sessions.sidebar.header.actions.extensionPages')}>
-                  <Icon name="puzzle" className={headerActionIconClass} />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(headerActionButtonClass, IDLE_PAGE_BUTTON_CLASS)}
+                    aria-label={t('sessions.sidebar.header.displayMode.label')}
+                  >
+                    <Icon name="equalizer-2" className={headerActionIconClass} />
+                  </button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.displayMode.label')}</p></TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="start" className="min-w-[200px]">
+              {displayMenuSections.map((section, index) => (
+                <React.Fragment key={index}>
+                  {index > 0 ? <DropdownMenuSeparator /> : null}
+                  {section}
+                </React.Fragment>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    // A page from the menu is open: the trigger says where it came from.
+                    className={cn(headerActionButtonClass, IDLE_PAGE_BUTTON_CLASS, morePageOpen && 'text-foreground')}
+                    aria-label={t('sessions.sidebar.header.actions.more')}
+                  >
+                    <Icon name="more" className={headerActionIconClass} />
+                  </button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.more')}</p></TooltipContent>
+            </Tooltip>
+            {/* Every page lives here, so a short window scrolls the list instead of cutting it. */}
+            <DropdownMenuContent align="start" className="min-w-[200px] overflow-y-auto">
+              {morePageItems.map((page) => (
+                <DropdownMenuItem key={page.key} onClick={page.onToggle} className="flex items-center gap-2">
+                  {page.icon}
+                  <span className="flex-1">{page.label}</span>
+                  {page.open ? checkMark : null}
+                  {page.key === 'source-board' && sourceBoardShortcut ? <span className="ms-auto ps-3 typography-meta text-muted-foreground">{sourceBoardShortcut}</span> : null}
+                </DropdownMenuItem>
+              ))}
+              {guestPages.length > 0 ? <>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>{t('sessions.sidebar.header.actions.extensionPages')}</DropdownMenuLabel>
-                {guestPages.map((guest) => <DropdownMenuItem key={guest.id} onSelect={() => useUIStore.getState().setOpenGuestPage(guest.id)}>
-                  <GuestIcon icon={resolveGuestIconName(guest.icon)} iconSrc={guestPackageIconSrc(guest.id, guest.icon, getRuntimeUrlResolver().authenticatedAsset)} className="size-4" />
-                  <span>{guest.pageTitle ?? guest.name}</span>
-                </DropdownMenuItem>)}
-              </DropdownMenuContent>
-            </DropdownMenu>}
-          </div>
-
-          <div ref={listControlsRef} className="flex min-w-0 items-center gap-1.5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={isSessionSearchOpen ? closeSessionSearch : openSessionSearch}
-                  className={cn(headerActionButtonClass, isSessionSearchOpen ? PRESSED_PAGE_BUTTON_CLASS : IDLE_PAGE_BUTTON_CLASS)}
-                  aria-label={t('sessions.sidebar.header.actions.searchSessions')}
-                  aria-expanded={isSessionSearchOpen}
-                >
-                  <Icon name="search" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.searchSessions')}</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleOpenDirectoryDialog}
-                  className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                  aria-label={t('sessions.sidebar.header.actions.addProject')}
-                >
-                  <Icon name="folder-add" className={headerActionIconClass} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.actions.addProject')}</p></TooltipContent>
-            </Tooltip>
-
-            <DropdownMenu>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className={cn(headerActionButtonClass, 'text-muted-foreground hover:text-foreground hover:bg-transparent')}
-                      aria-label={t('sessions.sidebar.header.displayMode.label')}
-                    >
-                      <Icon name="equalizer-2" className={headerActionIconClass} />
-                    </button>
-                  </DropdownMenuTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" sideOffset={4}><p>{t('sessions.sidebar.header.displayMode.label')}</p></TooltipContent>
-              </Tooltip>
-              <DropdownMenuContent align="end" className="min-w-[200px]">
-                {displayMenuSections.map((section, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 ? <DropdownMenuSeparator /> : null}
-                    {section}
-                  </React.Fragment>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                {guestPages.map((guest) => {
+                  const open = openGuestPageId === guest.id;
+                  return (
+                    <DropdownMenuItem key={guest.id} onClick={() => useUIStore.getState().setOpenGuestPage(open ? null : guest.id)} className="flex items-center gap-2">
+                      <GuestIcon icon={resolveGuestIconName(guest.icon)} iconSrc={guestPackageIconSrc(guest.id, guest.icon, getRuntimeUrlResolver().authenticatedAsset)} className="size-4" />
+                      <span className="flex-1">{guest.pageTitle ?? guest.name}</span>
+                      {open ? checkMark : null}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </> : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {isSessionSearchOpen ? (

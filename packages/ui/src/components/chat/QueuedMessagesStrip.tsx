@@ -232,7 +232,7 @@ export const QueuedMessagesStrip = memo(({ target, composerAgentName, onEditMess
 
     if (queuedMessages.length === 1) {
         return (
-            <div role="group" className={cn(ROW_CLASS, 'border-b border-border/60')} aria-label={t('chat.queuedMessage.title')}>
+            <div role="group" className={cn(ROW_CLASS, 'border-b border-edge')} aria-label={t('chat.queuedMessage.title')}>
                 <QueuedMessageRow
                     message={queuedMessages[0]}
                     target={target}
@@ -247,7 +247,7 @@ export const QueuedMessagesStrip = memo(({ target, composerAgentName, onEditMess
 
     // The whole header toggles the list, as the background commands header does.
     return (
-        <div role="group" className="border-b border-border/60" aria-label={t('chat.queuedMessage.title')}>
+        <div role="group" className="border-b border-edge" aria-label={t('chat.queuedMessage.title')}>
             <div className="flex oc-composer-row items-center ps-3 pe-3">
                 <Button
                     type="button"

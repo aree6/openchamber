@@ -692,7 +692,7 @@ export function NewWorktreeDialog({
 
   // One row, the height of a field, whether empty or holding the chosen item.
   const itemPicker = linkedView ? (
-    <div className={cn('flex h-8 min-w-0 items-center gap-2 rounded-lg border border-border/60 px-2.5', itemPickerDisabled && 'opacity-50')}>
+    <div className={cn('flex h-8 min-w-0 items-center gap-2 rounded-lg border border-edge px-2.5', itemPickerDisabled && 'opacity-50')}>
       {linkedView.icon}
       <span className="shrink-0 typography-micro text-muted-foreground">{linkedView.id}</span>
       <span className="min-w-0 flex-1 truncate typography-ui-label text-foreground">{linkedView.title}</span>

@@ -373,7 +373,7 @@ export const WalkthroughView = ({ directory: rootDirectory, visible = true }: Wa
         ref={headerRef}
         className={cn(
           'walkthrough-header flex min-w-0 flex-nowrap items-center gap-2 overflow-hidden',
-          inPanelHeader ? 'flex-1 py-1 pe-1' : 'shrink-0 border-b border-border/60 px-3 py-2'
+          inPanelHeader ? 'flex-1 py-1 pe-1' : 'shrink-0 border-b border-edge px-3 py-2'
         )}
       >
         {repositoryOptions ? (

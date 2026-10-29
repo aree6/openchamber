@@ -59,7 +59,7 @@ mock.module('@/lib/configSync', () => ({
   subscribeToConfigChanges: mock(() => () => undefined),
 }));
 
-const { useCommandsStore, invalidateCommandsLoadCache, selectCommandsForDirectory } = await import('./useCommandsStore');
+const { useCommandsStore, invalidateCommandsLoadCache, selectCommandsForDirectory, isCommandOfferedInComposer } = await import('./useCommandsStore');
 
 describe('useCommandsStore', () => {
   beforeEach(() => {
@@ -296,4 +296,14 @@ describe('useCommandsStore', () => {
     expect(useCommandsStore.getState().commands.map(c => c.name)).toEqual(['selected']);
   });
 
+});
+
+describe('isCommandOfferedInComposer', () => {
+  test('hides OpenCode\'s own /goal but keeps a user command of that name', () => {
+    expect(isCommandOfferedInComposer({ name: 'goal', fromOpenCode: true })).toBe(false);
+    expect(isCommandOfferedInComposer({ name: 'goal', scope: 'project' })).toBe(true);
+    // A failed metadata read leaves the command unclassified: keep it.
+    expect(isCommandOfferedInComposer({ name: 'goal' })).toBe(true);
+    expect(isCommandOfferedInComposer({ name: 'review' })).toBe(true);
+  });
 });

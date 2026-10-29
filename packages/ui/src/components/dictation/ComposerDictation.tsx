@@ -26,6 +26,8 @@ import { isVSCodeRuntime } from '@/lib/desktop';
 import { useConfigStore } from '@/stores/useConfigStore';
 import { useUIStore } from '@/stores/useUIStore';
 import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/shortcuts';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ComposerDictationProps {
     radius?: number | string;
@@ -133,7 +135,7 @@ export const ComposerDictation: React.FC<ComposerDictationProps> = ({
     const { currentTheme } = useThemeSystem();
     const dictationEnabled = useConfigStore((state) => state.dictationEnabled);
     const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
-    const dictationShortcut = formatShortcutForDisplay(getEffectiveShortcutCombo('toggle_dictation', shortcutOverrides));
+    const dictationShortcut = formatShortcutForDisplay(getEffectiveShortcutCombo('toggle_dictation', shortcutOverrides), '');
     // The dictation server (WebSocket + STT worker) lives in the OpenChamber
     // web server; the VS Code bridge has no server process for it.
     const [supported] = React.useState(() => !isVSCodeRuntime() && isDictationCaptureSupported());
@@ -401,6 +403,8 @@ export const ComposerDictation: React.FC<ComposerDictationProps> = ({
     return (
         <>
             {renderTrigger ? (
+                <Tooltip>
+                <TooltipTrigger asChild>
                 <button
                     type="button"
                     {...keepKeyboardFocusProps}
@@ -409,11 +413,13 @@ export const ComposerDictation: React.FC<ComposerDictationProps> = ({
                         void startDictation();
                     }}
                     disabled={disabled || isActive}
-                    title={dictationShortcut ? `${t('chat.dictation.start')} (${dictationShortcut})` : t('chat.dictation.start')}
                     aria-label={t('chat.dictation.start')}
                 >
                     <Icon name="mic" className={cn(iconSizeClass, 'text-current')} />
                 </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" sideOffset={8}><TooltipLabelWithShortcut label={t('chat.dictation.start')} shortcut={dictationShortcut} /></TooltipContent>
+                </Tooltip>
             ) : null}
             {isActive ? (
                 <div
@@ -431,7 +437,7 @@ export const ComposerDictation: React.FC<ComposerDictationProps> = ({
                         // an inner layer; this element keeps the surface's
                         // text context.
                         'oc-dictation-overlay absolute inset-0 z-50 flex flex-col overflow-x-hidden overflow-y-hidden',
-                        isMobile && 'oc-surface-elevated border border-border/80 shadow-[0_4px_16px_-4px_rgb(0_0_0_/_0.12)]',
+                        isMobile && 'oc-surface-elevated border border-edge shadow-[0_4px_16px_-4px_rgb(0_0_0_/_0.12)]',
                         // Mobile: the overlay surface shows instantly (riding the
                         // pill → voice morph), its content fades in only after the
                         // shape has grown — otherwise the controls paint clipped

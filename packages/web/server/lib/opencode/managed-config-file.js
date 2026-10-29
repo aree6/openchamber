@@ -17,6 +17,13 @@ export const MANAGED_CONFIG_FILE_NAME = 'opencode.managed.json';
 const DISABLED_BUILTIN_PLUGINS = ['-opencode.browser'];
 
 /**
+ * OpenCode's own `image_generate` tool (2.2.1+, opt-in through
+ * `experimental.image_generate`), switched off while `openchamber_image` is
+ * on, so the agent sees one image tool, the one using the model the user chose.
+ */
+const BUILTIN_IMAGE_PLUGIN = '-opencode.tool.image-generate';
+
+/**
  * The managed OpenCode config layer.
  *
  * OpenCode 2 watches every config source it reads, including the file named by
@@ -66,9 +73,9 @@ export const createManagedConfigRuntime = ({
   /** The user owns `OPENCODE_CONFIG` when their environment already set it. */
   const ownsConfigFile = () => (env.OPENCODE_CONFIG ?? '').trim().length === 0;
 
-  const writeConfigFile = async ({ directories, permissions }) => {
+  const writeConfigFile = async ({ disabled, directories, permissions }) => {
     await fsPromises.mkdir(instanceDir, { recursive: true });
-    const config = { plugins: [...DISABLED_BUILTIN_PLUGINS, ...directories] };
+    const config = { plugins: [...disabled, ...directories] };
     if (permissions.length > 0) config.permissions = permissions;
     const text = `${JSON.stringify(config, null, 2)}\n`;
     // Temp + rename: OpenCode reacts to the write immediately, and a partial
@@ -114,7 +121,8 @@ export const createManagedConfigRuntime = ({
       directories.push(await limitFailoverRuntime.materializePlugin());
     }
     directories.push(await materializeSessionTitlePlugin({ fsPromises, path, instanceDir }));
-    return { directories, permissions };
+    const disabled = includeImage ? [...DISABLED_BUILTIN_PLUGINS, BUILTIN_IMAGE_PLUGIN] : DISABLED_BUILTIN_PLUGINS;
+    return { disabled, directories, permissions };
   };
 
   /**
@@ -130,7 +138,7 @@ export const createManagedConfigRuntime = ({
       return { ...childEnv, OPENCODE_CONFIG: filePath };
     }
     let content = env.OPENCODE_CONFIG_CONTENT;
-    for (const directory of [...DISABLED_BUILTIN_PLUGINS, ...enabled.directories]) {
+    for (const directory of [...enabled.disabled, ...enabled.directories]) {
       content = appendManagedPlugin(content, directory, 'managed plugin');
     }
     if (enabled.permissions.length > 0) content = appendManagedPermissions(content, enabled.permissions);

@@ -13,7 +13,7 @@ type RepositoryConfigurationDialogProps = {
 };
 
 /** Every editor after the first in the dialog is separated by the settings divider. */
-const DIALOG_DIVIDER_CLASS = 'border-t border-border/60 pt-4';
+const DIALOG_DIVIDER_CLASS = 'border-t border-edge pt-4';
 
 /**
  * What a repository needs beyond its identity.

@@ -2,7 +2,8 @@ import { registerPlugin } from '@capacitor/core';
 import React from 'react';
 
 import { observeNativeKeyboardHeight, resetHardwareKeyboardDetection, startHardwareKeyboardBridge } from '@/lib/hardwareKeyboard';
-import { KEYBOARD_EASING_CSS, KEYBOARD_HIDE_MS, KEYBOARD_SHOW_MS } from '@/lib/mobileKeyboardTiming';
+import { KEYBOARD_EASING_CSS, KEYBOARD_HIDE_MS, KEYBOARD_SHOW_MS, keyboardKeyframes } from '@/lib/mobileKeyboardTiming';
+import { writeMobileKeyboardVar } from '@/lib/mobileKeyboardInsets';
 
 /** True when running inside the native Capacitor shell (iOS/Android app). */
 export const isCapacitorMobileApp = (): boolean => {
@@ -47,7 +48,7 @@ export const useNativeMobileChrome = (): void => {
     cleanup.push(startHardwareKeyboardBridge());
 
     const setInset = (px: number) => {
-      root.style.setProperty('--oc-keyboard-inset', `${Math.max(0, Math.round(px))}px`);
+      writeMobileKeyboardVar('--oc-keyboard-inset', px);
     };
 
     void import('@capacitor/status-bar').then(async ({ StatusBar, Style }) => {
@@ -180,11 +181,13 @@ export const useNativeMobileChrome = (): void => {
       // resize is invisible. visualViewport tracking was tried but doesn't shrink
       // under WKWebView's `resize: 'none'`, so these events are the reliable signal.
       // Durations and curve are shared with the composer morph and the
-      // scroller inset tween (mobileKeyboardTiming.ts); the hide leg is also
-      // mirrored by the .oc-kb-hide transition-duration override in mobile.css.
+      // transcript's follow glide (mobileKeyboardTiming.ts).
       const KB_ANIM_MS = KEYBOARD_SHOW_MS;
       const KB_HIDE_MS = KEYBOARD_HIDE_MS;
       const KB_ANIM_EASING = KEYBOARD_EASING_CSS;
+      // Surfaces that follow the keyboard in CSS (mobile.css) take the same curve.
+      root.style.setProperty('--oc-kb-duration', `${KB_ANIM_MS}ms`);
+      root.style.setProperty('--oc-kb-easing', KB_ANIM_EASING);
       let settleTimer: number | null = null;
       let caretTimer: number | null = null;
       let keyboardHeight = 0;
@@ -192,8 +195,8 @@ export const useNativeMobileChrome = (): void => {
       let safeBottomPx = 0;
       let keyboardOpen = false;
 
-      const setVar = (name: string, px: number) => {
-        root.style.setProperty(name, `${Math.max(0, Math.round(px))}px`);
+      const setVar = (name: '--oc-kb-layout' | '--oc-kb-scroll-inset', px: number) => {
+        writeMobileKeyboardVar(name, px);
       };
       const clearSettle = () => {
         if (settleTimer !== null) {
@@ -222,8 +225,36 @@ export const useNativeMobileChrome = (): void => {
         if (draftCenter) movers.push({ el: draftCenter, factor: 0.5 });
         return movers;
       };
+      // The movers slide as Web Animations on keyframes of the keyboard's
+      // curve, which Core Animation runs at the screen's rate whatever the
+      // main thread is doing (a CSS transition on a `linear()` easing ran on
+      // the main thread instead). The inline transform holds where a slide
+      // ends; the animation covers the way there.
+      const moverAnimations = new WeakMap<HTMLElement, Animation>();
+      const moverShift = (el: HTMLElement): number => {
+        const transform = getComputedStyle(el).transform;
+        return transform && transform !== 'none' ? new DOMMatrixReadOnly(transform).m42 : 0;
+      };
+      const slideMovers = (durationMs: number, from: (el: HTMLElement, factor: number) => number, to: (factor: number) => number) => {
+        const movers = getKbMovers();
+        // Read every start before writing, so the reads cost one style pass.
+        const starts = movers.map(({ el, factor }) => from(el, factor));
+        movers.forEach(({ el, factor }, index) => {
+          moverAnimations.get(el)?.cancel();
+          const start = starts[index];
+          const end = to(factor);
+          el.style.transition = '';
+          el.style.transform = `translateY(${end}px)`;
+          if (Math.abs(end - start) < 0.5) return;
+          moverAnimations.set(el, el.animate(
+            keyboardKeyframes((position) => ({ transform: `translateY(${start + (end - start) * position}px)` })),
+            { duration: durationMs, easing: 'linear' },
+          ));
+        });
+      };
       const clearKbMovers = () => {
         for (const { el } of getKbMovers()) {
+          moverAnimations.get(el)?.cancel();
           el.style.transition = '';
           el.style.transform = '';
         }
@@ -253,10 +284,7 @@ export const useNativeMobileChrome = (): void => {
         }
         root.classList.add('oc-keyboard-open', 'oc-kb-animating', 'oc-kb-caret-hold');
         setInset(keyboardHeight);
-        for (const { el, factor } of getKbMovers()) {
-            el.style.transition = `transform ${KB_ANIM_MS}ms ${KB_ANIM_EASING}`;
-            el.style.transform = `translateY(${-slide * factor}px)`;
-        }
+        slideMovers(KB_ANIM_MS, (el) => moverShift(el), (factor) => -slide * factor);
         // Reserve the keyboard strip inside the chat scroller NOW, in one
         // write: the transcript's geometry is final from the first frame and
         // the chat's follow glide (keyboardFollowGlide, started by the anim
@@ -311,29 +339,21 @@ export const useNativeMobileChrome = (): void => {
         // be, and the settle write below then only clamps it to the value it
         // already has. Releasing the padding here would drop the transcript
         // at frame 0 while the composer was still sliding.
+        const wasSettledOpen = layoutApplied;
         if (layoutApplied) {
           // Settled-open → restore the full-height layout NOW (still hidden behind
-          // the keyboard) and FLIP the movers to their raised position without
-          // transitioning, so the next frame looks unchanged.
+          // the keyboard); the movers start from their raised position below, so
+          // the next frame looks unchanged.
           root.classList.remove('oc-kb-animating');
           setVar('--oc-kb-layout', 0);
           layoutApplied = false;
-          for (const { el, factor } of getKbMovers()) {
-            el.style.transition = 'none';
-            el.style.transform = `translateY(${-slide * factor}px)`;
-          }
-          // Force the style/layout flush so the transition below starts from the
-          // FLIP position instead of coalescing both writes into one frame.
-          void (document.querySelector('.oc-mobile-app-shell') as HTMLElement | null)?.offsetHeight;
         }
-        // If the hide interrupted a show mid-animation (layout not applied yet),
-        // the movers transition back down from wherever they currently are.
         dispatchKb('oc:keyboard-anim', { phase: 'hide', slide, durationMs: KB_HIDE_MS, easing: KB_ANIM_EASING });
         root.classList.add('oc-kb-animating', 'oc-kb-hide');
-        for (const { el } of getKbMovers()) {
-            el.style.transition = `transform ${KB_HIDE_MS}ms ${KB_ANIM_EASING}`;
-            el.style.transform = 'translateY(0px)';
-        }
+        // Settled open, the movers start from their raised position (the
+        // layout just dropped under them); a hide that interrupts a show
+        // starts them from wherever they are.
+        slideMovers(KB_HIDE_MS, (el, factor) => (wasSettledOpen ? -slide * factor : moverShift(el)), () => 0);
         settleTimer = window.setTimeout(() => {
           settleTimer = null;
           root.classList.remove('oc-kb-animating', 'oc-kb-hide');
@@ -391,10 +411,11 @@ export const useNativeMobileChrome = (): void => {
       cleanup.forEach((remove) => remove());
       resetHardwareKeyboardDetection();
       root.classList.remove('oc-capacitor-app', 'oc-keyboard-open', 'oc-kb-animating', 'oc-kb-hide', 'oc-kb-caret-hold', 'oc-platform-android', 'oc-android-below-status-bar');
-      root.style.removeProperty('--oc-keyboard-inset');
-      root.style.removeProperty('--oc-kb-shift');
-      root.style.removeProperty('--oc-kb-layout');
-      root.style.removeProperty('--oc-kb-scroll-inset');
+      writeMobileKeyboardVar('--oc-keyboard-inset', null);
+      writeMobileKeyboardVar('--oc-kb-layout', null);
+      writeMobileKeyboardVar('--oc-kb-scroll-inset', null);
+      root.style.removeProperty('--oc-kb-duration');
+      root.style.removeProperty('--oc-kb-easing');
     };
   }, []);
 };

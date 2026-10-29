@@ -10,6 +10,7 @@ import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/short
 import { invokeDesktop } from '@/lib/desktop';
 import { useDesktopWindowControlsLayout } from '@/hooks/useDesktopWindowControlsLayout';
 import { publishTitlebarControlsWidth } from './titlebarControlsWidth';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
 
 // Like the icon rail: muted at rest, full strength on hover or while what it
 // controls is on, and no hover fill.
@@ -151,7 +152,9 @@ export const TitlebarLeftControls: React.FC = () => {
           <button
             type="button"
             onClick={handleNewSession}
-            className={cn(ICON_BUTTON_CLASS, '-ms-1 w-auto min-w-0 px-1.5 font-normal')}
+            // ps-1 puts the icon where the icon-only button centres it (4px
+            // in), so it stays put when the label folds away.
+            className={cn(ICON_BUTTON_CLASS, '-ms-1 w-auto min-w-0 ps-1 pe-1.5 font-normal')}
           >
             <Icon name="chat-new" className="h-4 w-4 shrink-0" />
             <span className="truncate">{t('sessions.sidebar.header.actions.newSession')}</span>
@@ -169,7 +172,7 @@ export const TitlebarLeftControls: React.FC = () => {
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{t('sessions.sidebar.header.actions.newSession')}</p>
+              <TooltipLabelWithShortcut label={t('sessions.sidebar.header.actions.newSession')} shortcut={formatShortcutForDisplay(getEffectiveShortcutCombo('new_chat', shortcutOverrides), '')} />
             </TooltipContent>
           </Tooltip>
         )}

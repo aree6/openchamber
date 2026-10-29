@@ -276,7 +276,7 @@ export const HelpDialog: React.FC = () => {
                           {t('helpDialog.keyCombiner.or')}
                         </span>
                       )}
-                      <kbd className="inline-flex items-center gap-1 px-1.5 py-0.5 typography-meta bg-muted rounded border border-border/20">
+                      <kbd className="inline-flex items-center gap-1 px-1.5 py-0.5 typography-meta bg-muted rounded border border-edge-muted">
                         {keyCombo}
                       </kbd>
                     </React.Fragment>

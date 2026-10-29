@@ -1,4 +1,7 @@
 import React from 'react';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatShortcutForDisplay, getEffectiveShortcutCombo, getEffectiveShortcutPrefix, UNASSIGNED_SHORTCUT } from '@/lib/shortcuts';
 import { useSessionTurnActivity } from '@/sync/global-session-status';
 import { SessionActivityIndicator } from '@/components/session/SessionActivityIndicator';
 import {
@@ -113,6 +116,7 @@ const contextComponents: SessionTabMenuComponents = {
  */
 const SessionTabItem: React.FC<{
   tab: SessionTab;
+  tabNumber: number;
   isActive: boolean;
   /** The replaceable preview tab: italic title, pinned by double-click. */
   isPreview: boolean;
@@ -124,8 +128,13 @@ const SessionTabItem: React.FC<{
   closeOtherTabs: (id: string) => void;
   onMenuOpenChangeComplete?: (open: boolean) => void;
   children?: React.ReactNode;
-}> = ({ tab, isActive, isPreview, suppressControls, onSelect, onPin, onClose, renderMenu, closeOtherTabs, onMenuOpenChangeComplete, children }) => {
+}> = ({ tab, tabNumber, isActive, isPreview, suppressControls, onSelect, onPin, onClose, renderMenu, closeOtherTabs, onMenuOpenChangeComplete, children }) => {
   const { t } = useI18n();
+  const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
+  const tabPrefix = getEffectiveShortcutPrefix('switch_session_tab', shortcutOverrides);
+  const tabShortcut = tabPrefix && tabPrefix !== UNASSIGNED_SHORTCUT && tabNumber <= 9
+    ? formatShortcutForDisplay(`${tabPrefix}+${tabNumber}`)
+    : undefined;
   const [menuOpen, setMenuOpen] = React.useState(false);
   // Keeps the overlay (the dropdown's anchor) mounted through the close animation.
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -167,6 +176,8 @@ const SessionTabItem: React.FC<{
         onOpenChange={setContextMenuOpen}
         onOpenChangeComplete={(open) => onMenuOpenChangeComplete?.(open)}
       >
+        <Tooltip>
+        <TooltipTrigger asChild>
         <ContextMenu.Trigger
               render={(triggerProps) => (
                 <div
@@ -274,6 +285,8 @@ const SessionTabItem: React.FC<{
                           {renderMenu(menuArgsFor(dropdownComponents))}
                         </DropdownMenuContent>
                       </DropdownMenu>
+                      <Tooltip>
+                      <TooltipTrigger asChild>
                       <button
                         type="button"
                         aria-label={t('header.sessionTabs.closeTab')}
@@ -282,11 +295,17 @@ const SessionTabItem: React.FC<{
                       >
                         <Icon name="close" className="size-4" />
                       </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={6}><TooltipLabelWithShortcut label={t('header.sessionTabs.closeTab')} shortcut={isActive ? formatShortcutForDisplay(getEffectiveShortcutCombo('close_session_tab', shortcutOverrides), '') : undefined} /></TooltipContent>
+                      </Tooltip>
                     </div>
                   ) : null}
                 </div>
               )}
         />
+        </TooltipTrigger>
+        <TooltipContent side="bottom" sideOffset={6}><TooltipLabelWithShortcut label={title} shortcut={tabShortcut} /></TooltipContent>
+        </Tooltip>
         <ContextMenu.Portal>
           <ContextMenu.Positioner className="app-region-no-drag z-50">
             <ContextMenu.Popup
@@ -486,8 +505,9 @@ export const SessionTabsStrip: React.FC<{
           onDragEnd={handleDragEnd}
         >
           <SortableContext items={tabIdsInOrder} strategy={isRtl ? rectSortingStrategy : horizontalListSortingStrategy}>
-            {tabs.map((tab) => (
+            {tabs.map((tab, index) => (
               <SessionTabItem
+                tabNumber={index + 1}
                 key={tab.id}
                 tab={tab}
                 isActive={tab.id === currentSessionId}

@@ -890,7 +890,7 @@ class OpencodeService {
    * the expiry. OpenCode keeps watches in memory, so a restart drops them.
    */
   async watchFile(directory: string, relativePath: string): Promise<void> {
-    await call("file.watch", () => this.clientFor(directory).file.watch({ path: relativePath }))
+    await call("file.watch", () => this.clientFor(directory).experimental.file.watch({ path: relativePath }))
   }
 
   /**
@@ -1723,7 +1723,7 @@ class OpencodeService {
   /** One stateless generation with the server's default model unless `model` is given. */
   async generateText(prompt: string, options?: { model?: ModelSelection; directory?: string | null }): Promise<string> {
     const result = await call("generate.text", () =>
-      this.clientFor(options?.directory).generate.text({ prompt, model: options?.model ? toModelRef(options.model) : undefined }),
+      this.clientFor(options?.directory).experimental.generate.text({ prompt, model: options?.model ? toModelRef(options.model) : undefined }),
     )
     return result.text
   }
@@ -2113,11 +2113,11 @@ class OpencodeService {
   }
 
   async connectMcpServer(server: string, directory?: string | null): Promise<void> {
-    await call("mcp.connect", () => this.clientFor(directory).mcp.connect({ server }))
+    await call("mcp.connect", () => this.clientFor(directory).experimental.mcp.connect({ server }))
   }
 
   async disconnectMcpServer(server: string, directory?: string | null): Promise<void> {
-    await call("mcp.disconnect", () => this.clientFor(directory).mcp.disconnect({ server }))
+    await call("mcp.disconnect", () => this.clientFor(directory).experimental.mcp.disconnect({ server }))
   }
 
   // Lightweight readiness check. Full diagnostics still live at /health.
@@ -2190,7 +2190,7 @@ class OpencodeService {
     const results: Array<{ filename: string; path: string } | { filename: string; error: Error }> = []
     for (const { filename, bytes } of files) {
       try {
-        const written = await call("file.write", () => client.file.write({ path: `${folder}/${filename}`, payload: bytes }))
+        const written = await call("file.write", () => client.experimental.file.write({ path: `${folder}/${filename}`, payload: bytes }))
         results.push({ filename, path: written.data.path })
       } catch (error) {
         results.push({ filename, error: error instanceof Error ? error : new Error(String(error)) })

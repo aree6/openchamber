@@ -794,7 +794,7 @@ export function IntegrationsCatalogView(): React.ReactNode {
 
   /** The rail: back to browsing, then every installed integration with its state. */
   const renderRail = (): React.ReactNode => (
-    <aside className="flex w-56 shrink-0 flex-col border-e border-border/50">
+    <aside className="flex w-56 shrink-0 flex-col border-e border-edge">
       <div className="flex-1 overflow-y-auto p-2">
         <button
           type="button"

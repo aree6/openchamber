@@ -42,6 +42,8 @@ export type SessionSidebarActivityKey = 'pinned' | 'work' | 'chats' | 'timeline'
 
 /** Activity sections; the display menu's Collapse all / Expand all drive them with the projects. */
 export const SIDEBAR_ACTIVITY_KEYS: readonly SessionSidebarActivityKey[] = ['chats', 'pinned', 'work', 'timeline'];
+/** The `collapsedActivities` key of the Projects caption. */
+export const PROJECTS_CAPTION_COLLAPSE_KEY = 'projects';
 
 // 'project' is a one-line file tree row under a project. Rows of zones that
 // mix projects (Pinned, In work, the list by time) are 'mixed-compact', one
@@ -71,6 +73,9 @@ type RowBase = { key: string; estimateSize: number; treeGuides?: readonly Sessio
 export type SessionSidebarRow =
   | (RowBase & { kind: 'activity-header'; activityKey: SessionSidebarActivityKey; collapsed: boolean; forceExpanded: boolean })
   | (RowBase & { kind: 'project-header'; section: ProjectSection; collapsed: boolean; forceExpanded: boolean })
+  // The caption over the projects, as each zone has its own (desktop only);
+  // closing it folds every project away, as a zone's header folds its rows.
+  | (RowBase & { kind: 'caption'; caption: 'projects'; collapsed: boolean; forceExpanded: boolean })
   // `empty`: nothing to list under the header, so it offers no chevron.
   // `depth`: its tree level (1 inside a folder). `mixed`: listed among other
   // projects' works (In work, the list by time), so it names its project.
@@ -181,6 +186,8 @@ export type SessionSidebarRowModelArgs = {
   singleProjectId: string | null;
   showOnlyMainWorkspace: boolean;
   hideDirectoryControls: boolean;
+  /** A "Projects" caption over the project headers when something lists above them (the desktop's zones). */
+  projectsCaption?: boolean;
   sessionBatchSize?: number;
   /** Active multi-runs; their member sessions collapse into one run row per container. */
   runIndex?: MultiRunIndex;
@@ -257,7 +264,7 @@ const EMPTY_ARCHIVE_ANCHORS: ReadonlyMap<string, number> = new Map();
 const EMPTY_SPACE_IDS: ReadonlySet<string> = new Set();
 // One line: the 20px line, 6px above and below, and the 1px margin each side
 // the row renderer gives session rows (`my-px`).
-const SESSION_ESTIMATE = 34;
+const SESSION_ESTIMATE = 32;
 const TIMELINE_SESSION_ESTIMATE = 52;
 const estimateSessionRow = (context: SessionSidebarRenderContext): number => (
   isMultiLineTimelineContext(context) ? TIMELINE_SESSION_ESTIMATE : SESSION_ESTIMATE
@@ -270,7 +277,7 @@ const SESSIONS_INITIAL_LIMIT = 7;
 const SESSIONS_INCREMENT = 7;
 
 const HEADER_ESTIMATE = 32;
-// Zone and project headers: their label is a size up from rows (`typography-ui-section`).
+// Zone and project headers and the Projects caption, with the room around their labels.
 const SECTION_HEADER_ESTIMATE = 34;
 const STATUS_ESTIMATE = 28;
 
@@ -662,8 +669,9 @@ export const buildSessionSidebarRowModel = (args: SessionSidebarRowModelArgs): S
     const groupDrafts = search ? EMPTY_DRAFTS : args.draftsByGroupKey?.get(groupKey) ?? EMPTY_DRAFTS;
     // With Detailed rows the works of the project root take two lines too:
     // its sessions and drafts, in its folders as well. A worktree's own
-    // sessions and drafts are part of its work and stay one line.
-    const detailedWorks = args.detailedZoneRows === true && group.isMain === true;
+    // sessions and drafts are part of its work and stay one line, and so do
+    // Chats, which are one-line rows whatever the setting.
+    const detailedWorks = args.detailedZoneRows === true && group.isMain === true && limits?.renderContext !== 'tree-chat';
     // Their second line names the branch as a zone row's does: the project
     // root's, which every session there shares.
     const detailedMeta = detailedWorks && group.branch ? { branchLabel: group.branch } : undefined;
@@ -1071,11 +1079,18 @@ export const buildSessionSidebarRowModel = (args: SessionSidebarRowModelArgs): S
     const active = projectSections.find((section) => section.project.id === args.activeProjectId) ?? projectSections[0];
     projectSections = active ? [active] : [];
   }
+  let projectsCaptioned = !args.projectsCaption || args.singleProjectMode || args.showOnlyMainWorkspace || rows.length === 0;
   for (const section of projectSections) {
     const descriptors = buildGroupRenderDescriptors(section, { mainWorkspaceOnly: args.showOnlyMainWorkspace });
     // A project whose only matches moved to a zone shows no empty header.
     if (search && !descriptors.some((descriptor) => !movedGroupKeys.has(descriptor.groupKey) && groupSearchMatches(descriptor.group) > 0)) continue;
     const projectCollapsed = !search && !args.singleProjectMode && !args.showOnlyMainWorkspace && args.collapsedProjects.has(section.project.id);
+    if (!projectsCaptioned) {
+      projectsCaptioned = true;
+      const captionCollapsed = !search && args.collapsedActivities.has(PROJECTS_CAPTION_COLLAPSE_KEY);
+      push({ kind: 'caption', key: 'caption:projects', estimateSize: SECTION_HEADER_ESTIMATE, caption: 'projects', collapsed: captionCollapsed, forceExpanded: search });
+      if (captionCollapsed) break;
+    }
     if (!args.showOnlyMainWorkspace) {
       const rowIndex = rows.length;
       push({ kind: 'project-header', key: `project:${section.project.id}:header`, estimateSize: SECTION_HEADER_ESTIMATE, section, collapsed: projectCollapsed, forceExpanded: search });

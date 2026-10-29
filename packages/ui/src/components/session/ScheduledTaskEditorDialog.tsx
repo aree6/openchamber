@@ -1863,7 +1863,7 @@ export function ScheduledTaskEditorDialog(props: {
         onClose={() => onOpenChange(false)}
         contentMaxHeightClassName="max-h-[min(80vh,640px)]"
         renderHeader={(closeButton) => (
-          <div className="flex flex-col gap-1 border-b border-border/40 px-3 py-2">
+          <div className="flex flex-col gap-1 border-b border-edge-muted px-3 py-2">
             <div className="flex items-center justify-between gap-2">
               <h2 className="typography-ui-label font-semibold text-foreground">{title}</h2>
               {closeButton}

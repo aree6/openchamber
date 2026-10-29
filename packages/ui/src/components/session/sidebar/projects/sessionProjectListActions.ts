@@ -2,7 +2,7 @@ import { requestDirectoryAccess } from '@/lib/desktop';
 import { formatDirectoryName } from '@/lib/utils';
 import { refreshGlobalSessions } from '@/stores/useGlobalSessionsStore';
 import type { useChildStoreManager } from '@/sync/sync-context';
-import type { SessionSidebarRow } from '../sessionSidebarRowModel';
+import { PROJECTS_CAPTION_COLLAPSE_KEY, type SessionSidebarRow } from '../sessionSidebarRowModel';
 import { formatProjectLabel } from '../utils';
 import type { SessionProjectListProps } from './SessionProjectScroller';
 import type { ProjectSection } from './sessionProjectRender';
@@ -32,6 +32,15 @@ export const toggleActivityZone = (
   model.state.setCollapsedActivityKeys((current) => {
     const next = new Set(current);
     if (next.has(row.activityKey)) next.delete(row.activityKey); else next.add(row.activityKey);
+    return next;
+  });
+};
+
+/** Folds or opens every project under the Projects caption at once. */
+export const toggleProjectsCaption = ({ model }: Pick<SessionProjectListProps, 'model'>): void => {
+  model.state.setCollapsedActivityKeys((current) => {
+    const next = new Set(current);
+    if (next.has(PROJECTS_CAPTION_COLLAPSE_KEY)) next.delete(PROJECTS_CAPTION_COLLAPSE_KEY); else next.add(PROJECTS_CAPTION_COLLAPSE_KEY);
     return next;
   });
 };

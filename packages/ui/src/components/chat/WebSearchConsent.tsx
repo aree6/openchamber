@@ -151,8 +151,8 @@ export const WebSearchConsentCard: React.FC<{ form: FormRequest; consent: WebSea
     return (
         <div className="group w-full pt-0 pb-2">
             <div className="chat-column">
-                <div className="-mt-1 rounded-xl border border-border/30 bg-muted/10">
-                    <div className="flex items-center gap-2 border-b border-border/20 px-3 py-1.5">
+                <div className="-mt-1 rounded-xl border border-edge-muted bg-muted/10">
+                    <div className="flex items-center gap-2 border-b border-edge-muted px-3 py-1.5">
                         <Icon name="global" className="size-3.5 text-primary" />
                         <span className="typography-meta font-medium text-foreground">{consentTitle(consent, t)}</span>
                     </div>

@@ -212,7 +212,7 @@ const generateBridgeGitText = async ({
     : { id: modelID, providerID };
   for (let attempt = 0; ; attempt += 1) {
     try {
-      const result = await client.generate.text({ prompt, model }, { signal });
+      const result = await client.experimental.generate.text({ prompt, model }, { signal });
       return result.text.trim();
     } catch (error) {
       const tagged = error as { _tag?: unknown; providerID?: unknown; modelID?: unknown; service?: unknown } | null;

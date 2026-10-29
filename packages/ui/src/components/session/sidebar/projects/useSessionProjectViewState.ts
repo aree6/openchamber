@@ -3,7 +3,7 @@ import { updateDesktopSettings } from '@/lib/persistence';
 import { useProjectsStore } from '@/stores/useProjectsStore';
 import { getDeferredSafeStorage } from '@/stores/utils/safeStorage';
 import { z } from 'zod';
-import { SIDEBAR_ACTIVITY_KEYS } from '../sessionSidebarRowModel';
+import { PROJECTS_CAPTION_COLLAPSE_KEY, SIDEBAR_ACTIVITY_KEYS } from '../sessionSidebarRowModel';
 
 const PROJECT_COLLAPSE_STORAGE_KEY = 'oc.sessions.projectCollapse';
 const GROUP_COLLAPSE_STORAGE_KEY = 'oc.sessions.groupCollapse';
@@ -173,6 +173,7 @@ export const useSessionProjectViewState = ({
     setCollapsedActivities((current) => {
       const next = new Set(current);
       for (const key of SIDEBAR_ACTIVITY_KEYS) next.delete(key);
+      next.delete(PROJECTS_CAPTION_COLLAPSE_KEY);
       return next;
     });
     setCollapsedProjects(() => {

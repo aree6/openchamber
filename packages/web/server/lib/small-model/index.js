@@ -406,7 +406,7 @@ export async function generateSmallModelText({ prompt, system, maxOutputTokens, 
   const send = async () => {
     const model = { id: resolved.modelID, providerID: resolved.providerID };
     if (variant) model.variant = variant;
-    const result = await client.generate.text(
+    const result = await client.experimental.generate.text(
       { prompt: fullPrompt, model },
       generationOptions,
     );

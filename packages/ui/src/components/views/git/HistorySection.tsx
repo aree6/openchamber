@@ -110,7 +110,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
     : <Icon name="arrow-up" className="size-3.5" />;
 
   const renderCommitList = (entries: GitLogEntry[]) => (
-    <ul className="divide-y divide-border/60">
+    <ul className="divide-y divide-edge">
       {entries.map((entry) => (
         <HistoryCommitRow
           key={entry.hash}
@@ -132,7 +132,7 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
   );
 
   const loadMoreButton = log.all.length >= logMaxCount ? (
-    <div className="flex justify-center py-2 border-t border-border/40">
+    <div className="flex justify-center py-2 border-t border-edge-muted">
       <Button
         type="button"
         variant="ghost"
@@ -171,12 +171,12 @@ export const HistorySection: React.FC<HistorySectionProps> = ({
             ) : null}
 
             <div className="flex items-center gap-2 px-3 py-1.5" aria-hidden>
-              <span className="h-px flex-1 bg-border/60" />
+              <span className="h-px flex-1 bg-edge" />
               <span className="inline-flex max-w-[80%] items-center gap-1 typography-micro text-muted-foreground">
                 <span className="truncate" title={branchDivider.branchName}>{branchDivider.branchName}</span>
                 {dividerIcon}
               </span>
-              <span className="h-px flex-1 bg-border/60" />
+              <span className="h-px flex-1 bg-edge" />
             </div>
 
             {bottomEntries.length > 0 ? (

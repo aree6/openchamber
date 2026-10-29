@@ -110,7 +110,7 @@ Run the scenario in the runtime that executes the changed code. Every route belo
 | The in-app browser panel and its agent actions | `electron:dev`, then the actions through that instance's control route (`packages/web/server/lib/browser-control/DOCUMENTATION.md`) |
 | VS Code extension host or webview | `vscode:dev` with a debugging port, driven over CDP (`packages/vscode/README.md`) |
 | Behavior only the packaged app has: client auth headers, the updater | The installed app over CDP (`desktop-shell`, *Validation*) |
-| Capacitor shell | The iOS Simulator (`serve-sim`) |
+| Capacitor shell | The iOS Simulator (`serve-sim`); timing, motion and keyboard latency on a device (`performance-engineering`, `references/ios-webkit.md`) |
 | Pure logic | A deterministic test that fails without the change |
 
 Use `localhost`, never `127.0.0.1`, for the web server: the desktop app lifts Chromium's connection cap for `127.0.0.1`, and the panel then overruns Vite and resets connections. Build the desktop app only for a change that lives in its shell. Stop each instance by its own process id or process group, never by a name pattern that would stop someone else's.

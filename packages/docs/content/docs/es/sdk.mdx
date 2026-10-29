@@ -281,7 +281,7 @@ host.onResolve(async ({ command, args }) => {
 
 Cuando el usuario escribe `/task ABC-12` en el cuadro de chat, OpenChamber pide a tu extensión que lo resuelva y adjunta lo que devuelves como un chip, sin abrir nada. Devuelve `null` para "no se encontró nada". Si tu panel está cerrado, OpenChamber lo carga en segundo plano para esa llamada. Un nombre que OpenChamber u OpenCode ya usan se ignora.
 
-**Insignia en el icono de la barra lateral.** `host.setBadge(3)` muestra un número en tu icono, por ejemplo tareas abiertas; `host.setBadge(null)` lo quita. Abrir el panel también lo quita.
+**Insignia en el icono de la barra lateral.** `host.setBadge(3)` pone un punto en tu icono y muestra el número en su descripción emergente, por ejemplo tareas abiertas; `host.setBadge(null)` lo quita. Abrir el panel también lo quita.
 
 ## Tus herramientas en el chat
 

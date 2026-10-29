@@ -30,7 +30,7 @@ export type ReferenceThreadActions = {
 const THREAD_ACTION_CLASS = cn('h-6 px-1.5 hover:bg-transparent hover:text-foreground', REFERENCE_META_TEXT);
 
 const Avatar: React.FC<{ comment: ReferenceCommentItem; className: string }> = ({ comment, className }) => (
-    <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/60 bg-surface-elevated typography-micro text-muted-foreground', className)}>
+    <div className={cn('flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-edge bg-surface-elevated typography-micro text-muted-foreground', className)}>
         {comment.avatarUrl ? (
             <img src={comment.avatarUrl} alt="" className="size-full object-cover" loading="lazy" />
         ) : (
@@ -147,7 +147,7 @@ const ThreadRest: React.FC<{
         <>
             <CommentBody comment={comment} />
             {count > 0 ? (
-                <ul className="mt-2 flex flex-col gap-3 border-s border-border/60 ps-3">
+                <ul className="mt-2 flex flex-col gap-3 border-s border-edge ps-3">
                     {thread.replies.map((reply) => (
                         <li key={reply.key} className="group/reply min-w-0">
                             <div className={cn('flex min-w-0 items-center gap-1.5 typography-meta', REFERENCE_META_TEXT)}>
@@ -250,7 +250,7 @@ const CommitGroup: React.FC<{ group: ReferenceCommitGroup; now: number }> = ({ g
     const count = group.commits.length;
     return (
         <>
-            <div className="absolute inset-s-0 top-0 flex size-6 items-center justify-center rounded-full border border-border/60 bg-surface-elevated text-muted-foreground">
+            <div className="absolute inset-s-0 top-0 flex size-6 items-center justify-center rounded-full border border-edge bg-surface-elevated text-muted-foreground">
                 <Icon name="git-commit" className="size-3.5" />
             </div>
             <div className={cn('flex h-6 items-center typography-meta', REFERENCE_META_TEXT)}>
@@ -317,7 +317,7 @@ export const ReferenceComments: React.FC<{
                 const isLast = index === entries.length - 1;
                 return (
                     <div key={entry.key} className="group relative pb-4 ps-9 last:pb-0">
-                        {!isLast ? <div className="absolute bottom-1 inset-s-3 top-8 w-px bg-border/60" /> : null}
+                        {!isLast ? <div className="absolute bottom-1 inset-s-3 top-8 w-px bg-edge" /> : null}
                         {entry.kind === 'commits' ? <CommitGroup group={entry} now={now} /> : (
                             <>
                                 <Avatar comment={entry} className="absolute inset-s-0 top-0 size-6" />

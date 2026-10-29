@@ -211,7 +211,7 @@ export const PullRequestView: React.FC = () => {
   return (
     <div className="flex h-full min-h-0 flex-col">
       {repositoryOptions ? (
-        <div className="flex shrink-0 items-center border-b border-border/60 px-4 py-2">
+        <div className="flex shrink-0 items-center border-b border-edge px-4 py-2">
           <NestedRepoPicker
             repositories={repositoryOptions}
             selectedRepository={gitDirectory ?? null}

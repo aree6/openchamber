@@ -5,6 +5,7 @@ import { Icon } from '@/components/icon/Icon';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 import { isIMECompositionEvent } from '@/lib/ime';
+import { useMobileChatInsets } from '@/lib/mobileChatInsets';
 
 const SURFACE_ROOT_ID = 'mobile-surface-root';
 const ENTER_DELAY_MS = 16;
@@ -69,6 +70,7 @@ export const MobileFullscreenSurface: React.FC<MobileFullscreenSurfaceProps> = (
   children,
 }) => {
   const { t, direction } = useI18n();
+  const chatInsets = useMobileChatInsets();
   const rootRef = React.useRef<HTMLElement | null>(null);
   const [entered, setEntered] = React.useState(false);
   const [contentReady, setContentReady] = React.useState(false);
@@ -176,7 +178,7 @@ export const MobileFullscreenSurface: React.FC<MobileFullscreenSurfaceProps> = (
       className={cn(
         'flex flex-col bg-background text-foreground',
         isDialog
-          ? 'h-[min(88dvh,860px)] w-full max-w-[720px] overflow-hidden rounded-2xl border border-border/70 shadow-[0_24px_64px_rgb(0_0_0_/_0.32)]'
+          ? 'h-[min(88dvh,860px)] w-full max-w-[720px] overflow-hidden rounded-2xl border border-edge shadow-[0_24px_64px_rgb(0_0_0_/_0.32)]'
           : 'oc-keyboard-inset-surface oc-bottom-safe-surface fixed inset-0 z-50',
       )}
       style={isDialog ? {
@@ -206,7 +208,7 @@ export const MobileFullscreenSurface: React.FC<MobileFullscreenSurfaceProps> = (
         <header
           className={cn(
             'flex h-[var(--oc-header-height,56px)] shrink-0 items-center gap-2 px-3',
-            !noHeaderBorder && 'border-b border-border/70',
+            !noHeaderBorder && 'border-b border-edge',
           )}
         >
           <button
@@ -258,8 +260,8 @@ export const MobileFullscreenSurface: React.FC<MobileFullscreenSurfaceProps> = (
         opacity: entered ? 1 : 0,
         // 'chat' matches every other mobile overlay (the sessions sidebar keeps
         // its width); 'app' ignores the panels and centers on the window.
-        paddingLeft: dialogAlign === 'chat' ? 'max(1rem, var(--oc-chat-inset-left, 0px))' : '1rem',
-        paddingRight: dialogAlign === 'chat' ? 'max(1rem, var(--oc-chat-inset-right, 0px))' : '1rem',
+        paddingLeft: dialogAlign === 'chat' ? `max(1rem, ${chatInsets.left}px)` : '1rem',
+        paddingRight: dialogAlign === 'chat' ? `max(1rem, ${chatInsets.right}px)` : '1rem',
         paddingTop: 'max(1rem, var(--oc-safe-area-top, 0px))',
       }}
       onClick={onClose}

@@ -43,7 +43,7 @@ export function LinkedReferenceRow(props: LinkedReferenceRowProps) {
 
     return (
         <div
-            className="inline-flex h-7 max-w-full min-w-0 items-center gap-1.5 rounded-lg border border-border/80 bg-background ps-2 pe-1 text-xs"
+            className="inline-flex h-7 max-w-full min-w-0 items-center gap-1.5 rounded-lg border border-edge bg-background ps-2 pe-1 text-xs"
             title={title}
         >
             <button

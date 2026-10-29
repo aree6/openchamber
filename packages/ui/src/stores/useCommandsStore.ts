@@ -40,6 +40,8 @@ export interface Command extends CommandConfig {
   path?: string | null;
   /** The file still uses v1 spellings; the next save rewrites it in v2. */
   legacy?: boolean;
+  /** OpenChamber confirmed no command file or config entry: OpenCode or a plugin defines it. */
+  fromOpenCode?: boolean;
 }
 
 // Built-in commands provided by OpenCode (not defined in user config directories)
@@ -56,6 +58,15 @@ interface CommandEntityEnvelope {
 
 export const isCommandBuiltIn = (command: Command): boolean => {
   return BUILTIN_COMMAND_NAMES.has(command.name);
+};
+
+// OpenCode's own `/goal` (2.2.1+) duplicates Goal Mode, so the composer does
+// not offer it. A user's own `goal` command, or one whose metadata read
+// failed, stays.
+const HIDDEN_OPENCODE_COMMAND_NAMES = new Set(['goal']);
+
+export const isCommandOfferedInComposer = (command: Command): boolean => {
+  return !(command.fromOpenCode && !command.scope && HIDDEN_OPENCODE_COMMAND_NAMES.has(command.name));
 };
 
 const CONFIG_EVENT_SOURCE = "useCommandsStore";
@@ -102,6 +113,7 @@ const buildCommandsSignature = (commands: Command[]): string => {
       String(command.subagent === true),
       String(command.legacy === true),
       String(command.isBuiltIn === true),
+      String(command.fromOpenCode === true),
     ].join('|'))
     .join('||');
 };
@@ -337,6 +349,7 @@ export const useCommandsStore = create<CommandsStore>()(
                           scope,
                           path: data.path,
                           legacy: data.legacy === true,
+                          ...(data.source === 'none' ? { fromOpenCode: true } : {}),
                         };
                       }
                     } catch (err) {

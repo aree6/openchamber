@@ -340,7 +340,7 @@ const ImageArtifactView: React.FC<ImageArtifactProps> = ({ src, name, sizeBytes,
                 ? { width: natural.width * scale, height: natural.height * scale }
                 : undefined}
               className={cn(
-                'select-none rounded-md border border-border/30 bg-primary/10',
+                'select-none rounded-md border border-edge-muted bg-primary/10',
                 scale === null ? 'max-h-full max-w-full object-contain' : 'max-w-none shrink-0',
               )}
             />

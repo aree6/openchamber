@@ -65,8 +65,15 @@ subagent, the command, the pull request), and a finished unseen turn is
 `checkbox-circle` (success color). Collapsed aggregates show only running or
 unread. The local Appearance preference `animatedActivityIndicators`
 is off by default. Enabling it swaps every running kind for a stepped spinner,
-even when the OS requests reduced motion; the unread icon stays. Permission/question badges and per-session
-elapsed counters retain their existing precedence and behavior. A session
+even when the OS requests reduced motion; the unread icon stays. A permission
+or a question waiting on the user is one warning-colored glyph (`shield`,
+`question`) with no tinted pad, on rows, aggregates and the phone. While one
+waits, the row hides its running mark and elapsed counter: the session is
+stopped on the user, and blue beside blue hid the request (maintainer,
+2026-10-29). The counter reads the turn's start from the store, so it comes
+back at the right time. Colors carry state only: info while it runs, success
+once it waits to be read, warning while it waits on the user; the pin and
+other non-state marks are muted. A session
 row's title carries its state too: semibold at full strength while a finished
 turn is unseen or a permission or question waits on the user, full strength
 while it runs, a step below otherwise (`oc-title-rest`); the active row keeps the selection colors. The display
@@ -145,19 +152,20 @@ disclosure animation included). Only how a row is drawn and used differs, as
 the maintainer decided on 2026-10-24: a phone has no hover, no right click and
 no Shift.
 
-- The drawer keeps its header (close, Add project, the display menu, New
-  chat), the search field over the list, Reorder projects, the footer and the
-  dialogs a row opens (project edit, new worktree, worktree delete). The
+- The drawer keeps its header (close, Add project, the display menu, More,
+  New chat), the search field over the list, Reorder projects, the footer and
+  the dialogs a row opens (project edit, new worktree, worktree delete). The
   display menu holds Grouping (by project or by time, `sidebarGrouping`), the
   project sort while grouped by project, Show pinned section, Show In work,
   "Also show in work under projects", Detailed rows, "Name worktrees by
   branch" and Reorder projects. Chats
   shows while the per-surface show-chats setting is on, which Settings owns
   (#5354); the header's New chat starts a chat, so Chats has no "+" of its own.
-  The footer has the connected instance on the left (the app) and on the
-  right "More" (Scheduled tasks, Archive, Usage), a pending web update, the
-  overview, Issues and PRs, then Settings, the one filled button; the rest
-  are flat, as the header's. The iPad's sidebar keeps the search field behind
+  More holds the pages the list opens, as the desktop header's: Overview,
+  Issues and PRs, Scheduled tasks, Archive, Stats. The footer has the
+  connected instance on the left (the app), a pending web update and
+  Settings, the one filled button, on the right (maintainer, 2026-10-29:
+  the phone follows the desktop's sidebar). The iPad's sidebar keeps the search field behind
   a toggle at the header's leading edge, as the desktop does; closing it
   clears the query. The phone's drawer shows the field at once.
 - What a pointer does on hover or with a right click, a thumb does with a
@@ -175,7 +183,9 @@ no Shift.
   always shown, since there is no hover to reveal it: in the slot of a
   one-line row, over the second line's first icon of a two-line row, in a
   thumb-sized target. The live state sits on the right before the time on
-  every row, as on the desktop. No row shows a date, as on the
+  every row, and the marks before it come in the desktop's order (the goal,
+  the PR, the requests waiting on the user, the pin, the done hint). No row
+  shows a date, as on the
   desktop: the list is ordered by recency; a turn's duration shows while it
   runs and until it is read.
 - Detailed rows are on by default on the phone (store v12; a phone that was on
@@ -183,11 +193,15 @@ no Shift.
   do: a two-line row's text 12px in, a one-line row's slot there and its text
   20px further (`mobileSidebar/mobileSidebarGeometry.ts`); the tree guides
   follow. The old 32px inset under the project tile went with the tree it
-  served (maintainer, 2026-10-24).
+  served (maintainer, 2026-10-24). A two-line row takes the desktop's 6px
+  above and below; a one-line row keeps the phone's 36px floor for a thumb.
 - The drawer has one gutter, 12px on both sides, the New chat button's: the
   header's buttons, the search field, the section headers, the rows and the
-  footer all end there. A section header's icon sits in the column of the
-  rows' chevrons and states. Rows are rounded tiles, as on the desktop, not
+  footer all end there. Captions (the zones and Projects) are the desktop's
+  bare muted word with its chevron after it, always shown; a project header
+  puts its icon in the column of the rows' chevrons and states and its label
+  at the rows' size and medium weight (maintainer, 2026-10-29). Headers are
+  40px tall for a thumb. Rows are rounded tiles, as on the desktop, not
   bands across the screen. The selected row takes the
   desktop's selection fill and title colour, painted over the row's opaque
   background (`MOBILE_ACTIVE_ROW_CLASS`): the selection token is translucent,
@@ -492,15 +506,29 @@ all / Expand all.
   display menu's Collapse all / Expand all set every project and the zones
   (`SIDEBAR_ACTIVITY_KEYS`: Chats, Pinned, In work and the list by time)
   together. Session folders keep their own collapse state. Zone and project
-  headers are sticky. Their labels are bold and a size up from rows
-  (`typography-ui-section`, 0.9375rem on desktop, 1rem on the phone): at
-  the row's size and semibold, a project read as one more row (maintainer,
-  2026-10-26). A hairline sits in the middle of the gap before every
-  project header that has rows above it (`sectionWrapperClass`), so projects
-  read apart from each other and from the zones; it is drawn inside the gap
-  and adds no height. That gap is twice a zone's (16px against 8px), so the
-  space on each side of the line matches the space between two rows' titles
-  (maintainer, 2026-10-27).
+  headers are sticky. The projects sit under a "Projects"
+  caption (a `caption` row, `projectsCaption`) styled as a zone's label, so
+  every section has a caption and a project is an item of its list: its label
+  is the row's size, medium weight, beside its icon, and the indent of its
+  sessions sets it apart from them. A project a size up and bold, with
+  captioned zones above it, read as a heading of another level (maintainer,
+  2026-10-28). The caption shows only with something listed above the
+  projects, never in single-project mode. The caption folds like a zone: closed, it
+  hides every project (`PROJECTS_CAPTION_COLLAPSE_KEY` in the zones' saved
+  collapse set); Expand all opens it, Collapse all leaves it as it is and
+  folds the projects one by one. One-line rows (sessions, works, drafts,
+  runs) take 5px of vertical padding (a 30px row) and two-line rows 6px, so the one-line
+  list reads denser (maintainer, 2026-10-28).
+  A zone's label is a bare muted word at the row's size, with no icon, and
+  the widest gap above it (20px); its chevron follows the word, always while
+  the zone is closed and on hover while it is open. At a project's weight
+  zones made the list read as a document of sections, and a quiet label with
+  an icon in the projects' column read as one more row (maintainer,
+  2026-10-28). Projects are set apart by
+  space alone (`sectionSpacingAfter`): 12px before a project that has rows
+  above it, 2px after a collapsed project, so a run of collapsed projects
+  reads as a list. A hairline between projects was tried and dropped: with
+  projects collapsed it striped every row (maintainer, 2026-10-28).
 - Rows of zones that mix projects (Pinned, In work, the list by time) are
   `'mixed-compact'`: one line with no project icon (the room goes to the
   title; the whole-row tooltip names the project, branch and model), the PR
@@ -750,9 +778,17 @@ is mounted only while open and keyed by its open count, so every open, including
 a handover while it is already on screen, starts with the query it was given
 (empty for a plain open) and no directory filter.
 
-The header's page buttons (Issues and PRs, Scheduled tasks, Archive, extension
-pages, Usage in the footer) are toggles: pressed while their page is open, and
-the next click closes it.
+The desktop header row holds the list's own controls (Search, Add project,
+Display mode) and, last, one More menu with the pages the sidebar opens:
+Overview, Issues and PRs, Scheduled tasks, Archive, Stats, Integrations
+catalog, then extension pages. Shortcuts and About are not pages of the list:
+they stay on their keyboard shortcut, the command palette and the app menu,
+and About is a Settings page. A row of icons for every
+page said nothing without hovering and was the first thing on screen
+(maintainer, 2026-10-28). Each page item is a toggle: it carries a check while
+its page is open and the next pick closes it; the More trigger turns to the
+text colour while any of its pages is open. The footer keeps Settings, an
+available update and the instance switcher.
 
 Sidebar queries beginning with `ses_` match only the full session ID,
 case-insensitively and ignoring surrounding whitespace. Partial IDs and typos

@@ -1125,7 +1125,10 @@ under a running child.
   built-in browser tools need OpenCode's own desktop app to attach a browser;
   OpenChamber does not, so they would always fail with `browser.disconnected`
   and steer agents away from `openchamber_web`. A project config listing
-  `opencode.browser` re-enables it. The fallback path merges the same entry. Its layer sits above the user's
+  `opencode.browser` re-enables it. While `openchamber_image` is on,
+  `-opencode.tool.image-generate` follows it: OpenCode's own opt-in image tool
+  would give the agent a second image tool on a model the user did not pick
+  in Settings. The fallback path merges the same entries. Its layer sits above the user's
   global `opencode.json` and below their project config.
 - `OPENCODE_CONFIG_CONTENT` is passed through untouched, so whatever the user
   put there still applies.

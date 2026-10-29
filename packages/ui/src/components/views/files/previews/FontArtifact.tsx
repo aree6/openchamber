@@ -68,7 +68,7 @@ export const FontArtifact: React.FC<{
                 </span>
               </div>
             ))}
-            <div className="mt-2 flex flex-col gap-1 border-t border-border/40 pt-4 text-foreground" style={{ fontSize: '20px' }}>
+            <div className="mt-2 flex flex-col gap-1 border-t border-edge-muted pt-4 text-foreground" style={{ fontSize: '20px' }}>
               {GLYPH_ROWS.map((row) => <div key={row} className="break-all leading-relaxed">{row}</div>)}
             </div>
           </div>

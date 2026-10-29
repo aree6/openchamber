@@ -1134,7 +1134,7 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
     const sectionKey = `provider:${provider.id}`;
     return (
       <>
-        {providerIndex > 0 ? <div className="h-px bg-border/40 my-1" /> : null}
+        {providerIndex > 0 ? <div className="h-px bg-edge-muted my-1" /> : null}
         <div className="relative" role="group" aria-label={provider.name || provider.id}>
           {renderSectionSentinel(sectionKey)}
           {renderSectionHeader(sectionKey, <ProviderLogo providerId={provider.id} className="h-4 w-4 flex-shrink-0" />, provider.name || provider.id, headerDragProps)}
@@ -1168,7 +1168,7 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
 
   return (
     <>
-      <div className="px-2 py-1 border-b border-border/40">
+      <div className="px-2 py-1 border-b border-edge-muted">
         <div className="relative">
           <Icon name="search" className="absolute inset-s-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
@@ -1218,7 +1218,7 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
                 <span>{labels.notSelected}</span>
                 {!selectedModel ? <Icon name="check" className="h-4 w-4 text-inherit ms-auto" /> : null}
               </button>
-              <div className="h-px bg-border/40 my-1" />
+              <div className="h-px bg-edge-muted my-1" />
             </>
           ) : null}
 
@@ -1229,14 +1229,14 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
           {visibleLeadingEntry ? (
             <>
               {renderRow(visibleLeadingEntry, 'leading', false, currentFlatIndex++)}
-              {!showLeadingAction && (filteredFavorites.length > 0 || filteredRecents.length > 0 || filteredProviders.length > 0) ? <div className="h-px bg-border/40 my-1" /> : null}
+              {!showLeadingAction && (filteredFavorites.length > 0 || filteredRecents.length > 0 || filteredProviders.length > 0) ? <div className="h-px bg-edge-muted my-1" /> : null}
             </>
           ) : null}
 
           {leadingAction && showLeadingAction ? (
             <>
               {renderLeadingAction(leadingAction, currentFlatIndex++)}
-              <div className="h-px bg-border/40 my-1" />
+              <div className="h-px bg-edge-muted my-1" />
             </>
           ) : null}
 
@@ -1263,7 +1263,7 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
 
           {filteredRecents.length > 0 ? (
             <>
-              {filteredFavorites.length > 0 ? <div className="h-px bg-border/40 my-1" /> : null}
+              {filteredFavorites.length > 0 ? <div className="h-px bg-edge-muted my-1" /> : null}
               <div className="relative" role="group" aria-label={labels.recent}>
                 {renderSectionSentinel('recent')}
                 {renderSectionHeader('recent', <Icon name="time" className="h-4 w-4" />, labels.recent)}
@@ -1272,7 +1272,7 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
             </>
           ) : null}
 
-          {(filteredFavorites.length > 0 || filteredRecents.length > 0) && filteredProviders.length > 0 ? <div className="h-px bg-border/40 my-1" /> : null}
+          {(filteredFavorites.length > 0 || filteredRecents.length > 0) && filteredProviders.length > 0 ? <div className="h-px bg-edge-muted my-1" /> : null}
 
           {providerSortingEnabled ? (
             <DndContext sensors={providerSectionSensors} collisionDetection={closestCenter} onDragEnd={handleProviderDragEnd}>
@@ -1303,7 +1303,7 @@ export const ModelPickerList: React.FC<ModelPickerListProps> = ({
         ) : null}
       </div>
 
-      <div className="px-3 pt-1 pb-1.5 border-t border-border/40 typography-micro text-muted-foreground">
+      <div className="px-3 pt-1 pb-1.5 border-t border-edge-muted typography-micro text-muted-foreground">
         <ModelPickerFooter store={selectionStore} navigationList={flatModelList} footerContent={footerContent} fallback={labels.keyboardHint} />
       </div>
     </>

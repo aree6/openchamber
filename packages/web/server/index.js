@@ -1173,9 +1173,9 @@ const sessionKnowledgeRuntime = createSessionKnowledgeRuntime({
   persistSessionMetadata: (sessionID, directory, patch) => persistSessionMetadataPatch(sessionID, patch, { directory }),
   instructionEntries: {
     put: (sessionID, directory, key, value) => openCodeSessionClient(directory)
-      .session.instructions.entry.put({ sessionID, key, value }),
+      .experimental.session.instructions.entry.put({ sessionID, key, value }),
     remove: (sessionID, directory, key) => openCodeSessionClient(directory)
-      .session.instructions.entry.remove({ sessionID, key }),
+      .experimental.session.instructions.entry.remove({ sessionID, key }),
   },
 });
 
@@ -1423,8 +1423,11 @@ globalMessageStreamHub.subscribeEvent((event) => {
   if (directory && directory !== 'global') void openCodeTrust.forget(directory);
 });
 globalMessageStreamHub.subscribeStatus((status) => {
-  if (status?.type === 'connect') openCodeTrust.followLocations(true);
-  else if (status?.type === 'disconnect' || status?.type === 'error') openCodeTrust.followLocations(false);
+  if (status?.type === 'connect') {
+    openCodeTrust.followLocations(true);
+    // A goal whose idle event fell while the stream was down has no timer.
+    void sessionGoalRuntime.recoverActiveGoals();
+  } else if (status?.type === 'disconnect' || status?.type === 'error') openCodeTrust.followLocations(false);
 });
 
 // Session-assist subscribes to the hub directly: it needs the envelope's
@@ -2474,7 +2477,7 @@ async function main(options = {}) {
   const spaceArchive = createSpaceArchive({
     dataDir: OPENCHAMBER_DATA_DIR,
     hostOpenCode: {
-      importChat: (chat) => hostOpenCodeClient().session.import(chat),
+      importChat: (chat) => hostOpenCodeClient().experimental.session.import(chat),
       removeChat: (sessionID) => hostOpenCodeClient().session.remove({ sessionID }),
     },
   });

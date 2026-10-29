@@ -281,7 +281,7 @@ host.onResolve(async ({ command, args }) => {
 
 사용자가 채팅창에 `/task ABC-12`를 입력하면 OpenChamber는 확장에 해석을 요청하고, 돌려준 것을 아무것도 열지 않은 채 칩으로 첨부합니다. 찾은 것이 없으면 `null`을 반환하세요. 패널이 닫혀 있으면 OpenChamber가 이 호출을 위해 백그라운드에서 패널을 불러옵니다. OpenChamber나 OpenCode가 이미 쓰는 이름은 무시됩니다.
 
-**레일 아이콘의 배지.** `host.setBadge(3)`은 아이콘에 숫자(예: 열린 작업 수)를 표시하고, `host.setBadge(null)`은 지웁니다. 패널을 열어도 지워집니다.
+**레일 아이콘의 배지.** `host.setBadge(3)`은 아이콘에 점을 표시하고 숫자(예: 열린 작업 수)를 툴팁에 보여 주며, `host.setBadge(null)`은 지웁니다. 패널을 열어도 지워집니다.
 
 ## 채팅에 표시되는 내 도구
 

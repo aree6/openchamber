@@ -348,7 +348,7 @@ export function ChooserScreen({ onCliAvailable, localAvailable = true }: Chooser
               </button>
             </div>
 
-            <div className="mt-6 divide-y divide-border/60 border-y border-border/60">
+            <div className="mt-6 divide-y divide-edge border-y border-edge">
               <details
                 className="app-region-no-drag group"
                 open={advancedOpen}

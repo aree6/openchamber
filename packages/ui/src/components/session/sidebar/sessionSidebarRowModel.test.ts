@@ -109,6 +109,19 @@ describe('buildSessionSidebarRowModel', () => {
     expect(zoneRow?.kind === 'session' && zoneRow.renderContext).toBe('timeline-mixed');
   });
 
+  // A detailed estimate on a row drawn in one line left a gap under every
+  // chat once Detailed rows turned on.
+  test('detailed zone rows leave Chats one line', () => {
+    const input = args([]);
+    input.chatGroup = group([node('chat')], { id: 'managed-chats' });
+    input.detailedZoneRows = true;
+
+    const chat = buildSessionSidebarRowModel(input).rows.find((row) => row.kind === 'session');
+
+    expect(chat?.kind === 'session' && { context: chat.renderContext, detailed: chat.detailed, estimate: chat.estimateSize })
+      .toEqual({ context: 'tree-chat', detailed: false, estimate: 32 });
+  });
+
   test('Pinned opens above In work and its sessions stay in their project', () => {
     const input = args([project([group([node('pinned'), node('working')])])]);
     input.pinnedItems = [timelineItem('pinned')];

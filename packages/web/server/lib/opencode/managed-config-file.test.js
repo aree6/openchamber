@@ -154,15 +154,17 @@ describe('managed OpenCode config file', () => {
     });
   });
 
-  it('injects the image tool only when it is switched on', async () => {
-    const { runtime, current, agentToolRuntime } = await createHarness({ settings: {} });
+  it('injects the image tool only when it is switched on, and then disables OpenCode\'s own', async () => {
+    const { runtime, current, agentToolRuntime, readConfigFile } = await createHarness({ settings: {} });
 
     await runtime.buildManagedChildEnv();
     expect(agentToolRuntime.materializePlugin).toHaveBeenLastCalledWith(expect.objectContaining({ includeImage: false }));
+    expect((await readConfigFile()).plugins).not.toContain('-opencode.tool.image-generate');
 
     current.settings = { agentImageToolEnabled: true };
     await runtime.refreshManagedConfigFile();
     expect(agentToolRuntime.materializePlugin).toHaveBeenLastCalledWith(expect.objectContaining({ includeImage: true }));
+    expect((await readConfigFile()).plugins.slice(0, 2)).toEqual(['-opencode.browser', '-opencode.tool.image-generate']);
   });
 
   it('injects the knowledge tool by default and leaves it out once switched off', async () => {

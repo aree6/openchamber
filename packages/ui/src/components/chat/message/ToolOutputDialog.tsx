@@ -1051,7 +1051,7 @@ const ToolOutputDialog: React.FC<ToolOutputDialogProps> = ({ popup, onOpenChange
                                 // v2 file tools report `path`.
                                 const writeTarget = getInputValue('path') || getInputValue('filePath') || getInputValue('file_path') || '';
                                 return (
-                                <div className="border-b border-border/20 p-4 -mx-3">
+                                <div className="border-b border-edge-muted p-4 -mx-3">
                                     <div className="typography-markdown font-medium text-muted-foreground mb-2 px-3">
                                         {isShellTool(metaTool)
                                             ? 'Command:'

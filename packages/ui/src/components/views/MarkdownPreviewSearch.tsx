@@ -209,7 +209,7 @@ export const MarkdownPreviewSearch: React.FC<MarkdownPreviewSearchProps> = ({
   }
 
   return (
-    <div className={cn('absolute inset-e-3 top-3 z-10 flex items-center gap-1 rounded-lg border border-border/60 bg-[var(--surface-elevated)] px-1.5 py-1 shadow-lg', className)}>
+    <div className={cn('absolute inset-e-3 top-3 z-10 flex items-center gap-1 rounded-lg border border-edge bg-[var(--surface-elevated)] px-1.5 py-1 shadow-lg', className)}>
       <Icon name="search" className="ms-0.5 size-3.5 text-muted-foreground" />
       <Input
         ref={inputRef}

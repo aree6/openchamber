@@ -507,14 +507,15 @@ export const OverlayScrollbar: React.FC<OverlayScrollbarProps> = ({
         hidden
         className="overlay-scrollbar__thumb overlay-scrollbar__thumb--vertical"
         data-overlay-scrollbar-thumb="vertical"
-        style={{ right: `${TRACK_INSET / 2}px` }}
+        // The 10px hit area runs to the edge, so the drawn 4px sits 3px in from it.
+        style={{ right: 0 }}
       />
       <div
         ref={horizontalThumbRef}
         hidden
         className="overlay-scrollbar__thumb overlay-scrollbar__thumb--horizontal"
         data-overlay-scrollbar-thumb="horizontal"
-        style={{ bottom: `${TRACK_INSET / 2}px`, left: 0 }}
+        style={{ bottom: 0, left: 0 }}
       />
     </div>
   );

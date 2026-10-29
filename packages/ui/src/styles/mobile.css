@@ -552,7 +552,7 @@
    pinned. Instead the visual rise is transform-only (compositor) — a FLIP
    choreography driven by useNativeMobileChrome:
 
-     show: shell keeps its full height for the whole 0.25s; the composer (and, when
+     show: shell keeps its full height for the whole rise; the composer (and, when
            pinned, the chat scroll container — see useChatTimelineScroll) slides up via
            inline transforms in sync with the keyboard; at the end the shell snaps to
            its final height (--oc-kb-layout, one reflow) and the shift is removed
@@ -562,9 +562,30 @@
            and slide down with the keyboard.
 
    `keyboardWillShow` fires at the start of the iOS keyboard animation with the final
-   height, and the duration/curve mimic the native keyboard (≈0.25s,
-   cubic-bezier(0.38, 0.7, 0.125, 1)). (visualViewport live-tracking would be exact
+   height; the motion follows the keyboard's own spring (lib/mobileKeyboardTiming.ts,
+   written to --oc-kb-duration / --oc-kb-easing). (visualViewport live-tracking would be exact
    but doesn't report under WKWebView's `resize: 'none'`, so this is the best signal.) */
+/* Registered non-inherited and written only on the elements that read them
+   (lib/mobileKeyboardInsets.ts): set on the root, every keyboard open or close
+   restyled the whole page, about 150 ms on a long chat. */
+@property --oc-keyboard-inset {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --oc-kb-layout {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --oc-kb-scroll-inset {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
 :root.oc-capacitor-app .oc-mobile-app-shell {
   height: calc(100dvh - var(--oc-kb-layout, 0px));
   /* Reserve the bottom safe area only while the keyboard is down — when it's up the
@@ -582,7 +603,7 @@
    be overridden by this rule's `transition` shorthand). */
 :root.oc-capacitor-app .oc-keyboard-inset-surface {
   bottom: var(--oc-keyboard-inset, 0px);
-  transition: bottom 0.25s cubic-bezier(0.38, 0.7, 0.125, 1), opacity 0.2s ease-out;
+  transition: bottom var(--oc-kb-duration, 0.25s) var(--oc-kb-easing, ease-out), opacity 0.2s ease-out;
 }
 /* While a panel is playing its enter animation, its bottom anchor snaps
    instead of transitioning — opening an overlay typically dismisses the
@@ -613,7 +634,7 @@
 :root.oc-capacitor-app .oc-keyboard-fill-screen {
   height: calc(100dvh - var(--oc-keyboard-inset, 0px));
   min-height: 0;
-  transition: height 0.25s cubic-bezier(0.38, 0.7, 0.125, 1);
+  transition: height var(--oc-kb-duration, 0.25s) var(--oc-kb-easing, ease-out);
 }
 
 /* Keyboard slide choreography: the composer (and the draft title, see
@@ -645,7 +666,7 @@
      the bottom-extension leg still tracks the shell's settle-time shrink. Both
      legs equal the keyboard height once settled, so the settle snap is
      geometry-neutral for the scroller. */
-  padding-bottom: var(--oc-kb-scroll-inset, var(--oc-kb-layout, 0px));
+  padding-bottom: var(--oc-kb-scroll-inset);
 }
 
 /* The iPad sidebar stays where it is when the keyboard opens, as iPadOS apps

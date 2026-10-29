@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useSessionUIStore } from '@/sync/session-ui-store';
 import { useChatSessionSelection } from './chatColumnSession';
-import { selectCommandsForDirectory, useCommandsStore } from '@/stores/useCommandsStore';
+import { isCommandOfferedInComposer, selectCommandsForDirectory, useCommandsStore } from '@/stores/useCommandsStore';
 import { useEffectiveDirectory } from '@/hooks/useEffectiveDirectory';
 import { ScrollableOverlay } from '@/components/ui/ScrollableOverlay';
 import { useI18n } from '@/lib/i18n';
@@ -13,6 +13,7 @@ import { mergeCommandAutocompleteItems, rankCommandAutocompleteItems } from './c
 import { useGuestCommands } from '@/hooks/useGuestSurfaces';
 import { AutocompleteRowDetail } from './composer/ui/AutocompleteRowParts';
 import { useAutocompleteSelectionScroll } from './composer/ui/useAutocompleteSelectionScroll';
+import { useHeightMorph } from '@/lib/motion/useSizeMorph';
 
 // Skills are not here: they have their own `$` picker.
 type CommandSource = 'openchamber' | 'opencode' | 'extension';
@@ -76,6 +77,9 @@ export const CommandAutocomplete = React.forwardRef<CommandAutocompleteHandle, C
   const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
   const { listRef, onKeyboardNavigate } = useAutocompleteSelectionScroll(selectedIndex, itemRefs);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  // Narrowing as the user types, the box eases into its new height; the
+  // edge it is anchored to stays put.
+  useHeightMorph(containerRef);
   // A caret placement brings its own max-height.
   const mobileMaxHeight = useMobileAutocompleteMaxHeight(containerRef, style?.maxHeight === undefined);
   const ignoreClickRef = React.useRef(false);
@@ -115,7 +119,7 @@ export const CommandAutocomplete = React.forwardRef<CommandAutocompleteHandle, C
   // The list depends on the registries, not on what is typed: it is built
   // once per registry change, and only the ranking follows the query.
   const allCommands = React.useMemo<CommandInfo[]>(() => {
-    const customCommands: CommandInfo[] = commandsWithMetadata.map((cmd, index) => ({
+    const customCommands: CommandInfo[] = commandsWithMetadata.filter(isCommandOfferedInComposer).map((cmd, index) => ({
       id: `opencode:${cmd.scope ?? 'global'}:${cmd.name}:${cmd.agent ?? ''}:${cmd.model ?? ''}:${index}`,
       name: cmd.name,
       source: 'opencode',

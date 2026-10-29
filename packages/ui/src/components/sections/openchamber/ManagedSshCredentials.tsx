@@ -183,7 +183,7 @@ export function ManagedSshCredentials({ selection, disabled = false }: {
       </Button>
     </div>
     {state.candidates.length ? <div className="space-y-4">
-      {state.candidates.map((candidate, index) => 'candidateId' in candidate ? <div key={candidate.candidateId} className="space-y-2 border-t border-border/60 pt-3">
+      {state.candidates.map((candidate, index) => 'candidateId' in candidate ? <div key={candidate.candidateId} className="space-y-2 border-t border-edge pt-3">
         <p className="typography-settings-field-label text-foreground">{candidate.label}</p>
         <p className={cn(SETTINGS_HELPER_CLASS, 'break-all')}>{candidate.fingerprint}</p>
         <SettingsCheckboxRow

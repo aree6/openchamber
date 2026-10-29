@@ -542,7 +542,7 @@ export function ArchiveSessionsView({ layout, onLeave, initialQuery = '' }: {
     <div className="absolute inset-0 z-10 flex flex-col bg-background">
       <div className="flex min-h-0 flex-1">
         {/* Directory filter panel */}
-        <div className="flex w-64 flex-shrink-0 flex-col border-e border-border/50">
+        <div className="flex w-64 flex-shrink-0 flex-col border-e border-edge">
           <div className="flex-1 space-y-0.5 overflow-y-auto p-2">
             {renderDirectoryItem(
               '__all__',

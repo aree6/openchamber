@@ -333,7 +333,7 @@ export const WalkthroughStream = memo(function WalkthroughStream({
           id={stopElementId(stopView.stop.id)}
           data-stop-id={stopView.stop.id}
           className={cn(
-            'border-b border-border/60',
+            'border-b border-edge',
             activeStopId === stopView.stop.id && 'bg-interactive-selection/5'
           )}
         >
@@ -357,7 +357,7 @@ export const WalkthroughStream = memo(function WalkthroughStream({
       ))}
 
       {view.uncoveredHunks.length > 0 && (
-        <section className="border-b border-border/60">
+        <section className="border-b border-edge">
           <Button
             type="button"
             variant="ghost"

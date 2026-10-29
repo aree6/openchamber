@@ -40,7 +40,7 @@ const SetupBlockedDomains: React.FC<{ entry: SpaceEntry; span: { startedAt: stri
   if (blocked.length === 0) return null;
   const allowed = entry.network?.mode === 'allowlist' ? entry.network.domains : [];
   return (
-    <div className="flex flex-col gap-1.5 rounded-md border border-border/60 px-2.5 py-2">
+    <div className="flex flex-col gap-1.5 rounded-md border border-edge px-2.5 py-2">
       <p className="typography-meta text-muted-foreground">{t('spaces.setup.output.blocked')}</p>
       <ul className="flex flex-col gap-1.5">
         {blocked.map((domain) => (

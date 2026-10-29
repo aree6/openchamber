@@ -20,7 +20,7 @@ export const KnowledgeSplit: React.FC<{
 }> = ({ list, detail, emptyLabel }) => (
   <div className="flex h-full min-h-0">
     <div
-      className="h-full flex-shrink-0 overflow-y-auto border-e border-border/60 p-3"
+      className="h-full flex-shrink-0 overflow-y-auto border-e border-edge p-3"
       style={{ width: LIST_WIDTH_PX }}
     >
       {list}

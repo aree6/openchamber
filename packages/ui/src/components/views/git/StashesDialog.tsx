@@ -149,7 +149,7 @@ export const StashesDialog: React.FC<StashesDialogProps> = ({
           <p className="typography-micro text-muted-foreground">{t('gitView.stashes.includeUntrackedHint')}</p>
         </div>
 
-        <div className="-mx-5 border-t border-border/60" />
+        <div className="-mx-5 border-t border-edge" />
 
         <div className="relative">
           <Icon name="search" className="absolute inset-s-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />

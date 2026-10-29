@@ -623,7 +623,7 @@ export const SessionDialogs: React.FC = () => {
         <div className={cn(isWorktreeDelete ? 'space-y-3' : 'space-y-2')}>
             {deleteDialog.sessions.length > 0 && (
                 <div className={cn(
-                    isWorktreeDelete ? 'rounded-lg bg-muted/30 p-3' : 'space-y-1.5 rounded-xl border border-border/40 bg-sidebar/60 p-3'
+                    isWorktreeDelete ? 'rounded-lg bg-muted/30 p-3' : 'space-y-1.5 rounded-xl border border-edge-muted bg-sidebar/60 p-3'
                 )}>
                     {isWorktreeDelete && (
                         <div className="flex items-center gap-2">
@@ -688,7 +688,7 @@ export const SessionDialogs: React.FC = () => {
 
                 </div>
             ) : (
-                <div className="rounded-xl border border-border/40 bg-sidebar/60 p-3">
+                <div className="rounded-xl border border-edge-muted bg-sidebar/60 p-3">
                     <p className="typography-meta text-muted-foreground">
                         {t('sessions.sidebar.sessionDialogs.delete.note')}
                     </p>

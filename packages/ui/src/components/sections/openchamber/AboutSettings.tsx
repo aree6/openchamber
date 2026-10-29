@@ -7,9 +7,9 @@ import { UpdateDialog } from '@/components/ui/UpdateDialog';
 import { useDeviceInfo } from '@/lib/device';
 import { toast } from '@/components/ui';
 import { Button } from '@/components/ui/button';
+import { AboutLogo } from '@/components/ui/AboutLogo';
 import { Icon } from "@/components/icon/Icon";
 import { Spinner } from '@/components/ui/spinner';
-import { OpenChamberLogo } from '@/components/ui/OpenChamberLogo';
 import { useI18n } from '@/lib/i18n';
 import { runtimeFetch } from '@/lib/runtime-fetch';
 import { copyTextToClipboard } from '@/lib/clipboard';
@@ -432,7 +432,7 @@ export const AboutSettings: React.FC<AboutSettingsProps> = ({ initialUpdateDialo
     return (
       <div className="w-full space-y-6 pb-2">
         <div className="flex flex-col items-center text-center">
-          <OpenChamberLogo width={72} height={72} />
+          <AboutLogo size={72} />
           <h2 className={`mt-4 ${SETTINGS_BRAND_TITLE_CLASS}`}>OpenChamber</h2>
           <div className="mt-2 space-y-1 typography-ui text-muted-foreground">
             {isNativeApp ? (
@@ -565,8 +565,12 @@ export const AboutSettings: React.FC<AboutSettingsProps> = ({ initialUpdateDialo
   // Desktop layout
   return (
     <SettingsSection divider={false}>
+      <div className="mb-4 flex flex-col items-center text-center">
+        <AboutLogo />
+        <h2 className={`mt-3 ${SETTINGS_BRAND_TITLE_CLASS}`}>OpenChamber</h2>
+      </div>
       <div className="rounded-lg bg-[var(--surface-elevated)]/70 overflow-hidden flex flex-col">
-        <div className="flex flex-col @xl:flex-row @xl:items-center justify-between gap-4 px-4 py-3 border-b border-border/40">
+        <div className="flex flex-col @xl:flex-row @xl:items-center justify-between gap-4 px-4 py-3 border-b border-edge-muted">
           {isDesktopRemote ? (
             <>
               <div className="flex min-w-0 flex-col">
@@ -590,6 +594,15 @@ export const AboutSettings: React.FC<AboutSettingsProps> = ({ initialUpdateDialo
           </div>
           
           <div className="flex items-center gap-3">
+            {/* The action leads; its outcome reads after it. */}
+            <Button size="sm"
+              variant="outline"
+              onClick={checkAll}
+              disabled={update.checking}
+            >
+              {t('settings.openchamber.about.actions.checkForUpdates')}
+            </Button>
+
             {update.checking && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Icon name="loader" className="h-4 w-4 animate-spin" />
@@ -611,35 +624,28 @@ export const AboutSettings: React.FC<AboutSettingsProps> = ({ initialUpdateDialo
               <span className="typography-meta text-muted-foreground">{t('settings.openchamber.about.state.upToDate')}</span>
             )}
 
-            <Button size="sm"
-              variant="outline"
-              onClick={checkAll}
-              disabled={update.checking}
-            >
-              {t('settings.openchamber.about.actions.checkForUpdates')}
-            </Button>
           </div>
         </div>
         
         {manualUpdateNotice && (
-          <div className="px-4 py-3 border-b border-border/40">{manualUpdateNotice}</div>
+          <div className="px-4 py-3 border-b border-edge-muted">{manualUpdateNotice}</div>
         )}
 
         {remoteHostUpdateControls && (
-          <div className="px-4 py-3 border-b border-border/40">{remoteHostUpdateControls}</div>
+          <div className="px-4 py-3 border-b border-edge-muted">{remoteHostUpdateControls}</div>
         )}
 
         {openCodeUpdateControls && (
-          <div className="px-4 py-3 border-b border-border/40">{openCodeUpdateControls}</div>
+          <div className="px-4 py-3 border-b border-edge-muted">{openCodeUpdateControls}</div>
         )}
 
         {[update.error, remoteHostUpdate?.error].filter(Boolean).map((error) => (
-          <div key={error} className="px-3 py-2 border-b border-border/40">
+          <div key={error} className="px-3 py-2 border-b border-edge-muted">
             <p className="typography-meta text-[var(--status-error)]">{error}</p>
           </div>
         ))}
 
-        <div className="flex flex-col gap-2 border-b border-border/40 px-4 py-3 @xl:flex-row @xl:items-center @xl:justify-between">
+        <div className="flex flex-col gap-2 border-b border-edge-muted px-4 py-3 @xl:flex-row @xl:items-center @xl:justify-between">
           <span className={SETTINGS_FIELD_LABEL_CLASS}>{t('settings.openchamber.about.field.instanceUrls')}</span>
           <InstanceServiceUrls />
         </div>
@@ -653,6 +659,16 @@ export const AboutSettings: React.FC<AboutSettingsProps> = ({ initialUpdateDialo
           >
             <Icon name="github-fill" className="h-4 w-4" />
             <span>GitHub</span>
+          </a>
+
+          <a
+            href={DISCORD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground typography-meta transition-colors"
+          >
+            <Icon name="discord-fill" className="h-4 w-4" />
+            <span>Discord</span>
           </a>
 
             <a

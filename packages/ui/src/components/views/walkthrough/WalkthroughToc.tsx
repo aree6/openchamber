@@ -121,7 +121,7 @@ export const WalkthroughToc = memo(function WalkthroughToc({
 
   return (
     <nav
-      className={cn('flex flex-col overflow-y-auto', page ? 'min-h-0 flex-1 px-3 py-3' : 'shrink-0 border-e border-border/60 p-2')}
+      className={cn('flex flex-col overflow-y-auto', page ? 'min-h-0 flex-1 px-3 py-3' : 'shrink-0 border-e border-edge p-2')}
       style={page ? undefined : { width }}
     >
       {view.walkthrough.focus && (

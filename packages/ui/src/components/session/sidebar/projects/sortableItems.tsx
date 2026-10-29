@@ -95,9 +95,10 @@ const ProjectHeaderIdentity: React.FC<ProjectHeaderIdentityProps> = ({
           <Icon name="folder" className={cn('h-3.5 w-3.5 text-muted-foreground', iconVisibilityClassName)} style={iconColor ? { color: iconColor } : undefined} />
         )}
       </span>
-      {/* A clear step up from rows, in size and weight: projects and zones
-          are the top level of the tree and must not read as one of its rows. */}
-      <span className={cn('truncate typography-ui-section font-bold text-foreground', labelClassName)}>{projectLabel}</span>
+      {/* The row's size, medium weight, with its icon: under the Projects
+          caption a project is an item of the list, and its icon, weight and
+          the indent of its sessions set it apart from them. */}
+      <span className={cn('truncate typography-ui-label font-medium text-foreground', labelClassName)}>{projectLabel}</span>
     </>
   );
 };

@@ -32,7 +32,7 @@ import { FolderDeleteConfirmDialog, type DeleteFolderConfirmState } from '../she
 import type { SessionGroup } from '../types';
 import { SessionSidebarRows } from '../SessionSidebarRows';
 import { sessionTreeTextInset } from '../sessions/sessionTreeGeometry';
-import { SessionSidebarActivityHeader } from '../sessionSidebarHeaderPresentation';
+import { SessionSidebarActivityHeader, SessionSidebarCaption } from '../sessionSidebarHeaderPresentation';
 import { resolveSessionSidebarStickyHeader, type SessionSidebarRow, type SessionSidebarRowModel } from '../sessionSidebarRowModel';
 import { SortableProjectItem } from './sortableItems';
 import { WorktreeWorkRow } from '../works/WorktreeWorkRow';
@@ -42,7 +42,7 @@ import { SessionGroupSection, type SessionGroupSectionProps } from './SessionGro
 import type { ProjectSection } from './sessionProjectRender';
 import { CrossfadeZoneHeader, CrossfadeZoneHeaders } from './CrossfadeZoneHeaders';
 import { prepareSessionProjectAction } from './sessionProjectActionContext';
-import { applyShowControl, getProjectLabel, grantGroupAccess, retryGroupStatus, toggleActivityZone } from './sessionProjectListActions';
+import { applyShowControl, getProjectLabel, grantGroupAccess, retryGroupStatus, toggleActivityZone, toggleProjectsCaption } from './sessionProjectListActions';
 import { countArchiveAllOutcome, selectArchiveAllSessionIds, withArchiveAllSubtrees } from './archiveAllSessions';
 import { collectSessionSubtreeIds } from '../sessions/sessionSubtreeActions';
 import { useConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -464,6 +464,14 @@ function SessionProjectScrollerComponent({ model, view, actions }: SessionProjec
       );
     }
     if (row.kind === 'status') return renderStatus(row);
+    if (row.kind === 'caption') {
+      return <SessionSidebarCaption
+        collapsed={row.collapsed}
+        forceExpanded={row.forceExpanded}
+        alwaysShowActions={view.alwaysShowActions}
+        onToggle={() => toggleProjectsCaption({ model })}
+      />;
+    }
     if (row.emptyKind === 'sidebar') return model.emptyState;
     if (row.emptyKind === 'search') return model.searchEmptyState;
     return <div className="py-1 text-start typography-micro text-muted-foreground" style={{ paddingInlineStart: rowTextInset }}>

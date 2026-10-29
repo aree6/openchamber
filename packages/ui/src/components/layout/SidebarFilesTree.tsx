@@ -1600,8 +1600,8 @@ const SidebarFilesTreeContent: React.FC<{ visible: boolean; currentDirectory: st
     <section className="flex h-full min-h-0 flex-col overflow-hidden">
       {/* The action band matches the file editor's docked toolbar (40px,
           24px buttons) so the two read as one row across the panel. */}
-      <div className="flex flex-col border-b border-border/40">
-        <div className="flex h-8 shrink-0 items-center border-t border-border/40 px-2">
+      <div className="flex flex-col border-b border-edge-muted">
+        <div className="flex h-8 shrink-0 items-center border-t border-edge-muted px-2">
         {/* New file, new folder and upload share one "+" menu, so the band
             keeps four buttons and fits even the narrowest tree. */}
         <ActionToolbar

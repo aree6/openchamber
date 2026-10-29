@@ -239,8 +239,15 @@ the row. The rule and the resting
 height per column live in `state/composerTailInset.ts`; the mobile morph uses
 the same rule to announce how far the transcript's end moves, which is less
 than the slot's height change whenever part of it is taken from the gap. While the slot is taller than at rest
-the column carries `data-composer-grown`, and the recap hint, which rides the
-composer's top edge, hides until the composer is back at rest.
+the column carries `data-composer-grown`, and the recap hint hides until the
+composer is back at rest. Only the composer itself at its natural height sets
+the resting height: what stands in for it in the slot (a subagent's read-only
+banner, the mobile comment composer) carries `data-composer-transient`, and a
+slot the pill morph pins carries an inline height; both are shorter than the
+resting composer and, kept as the floor, left it "grown" until a reload. The hint lies under the latest answer's footer as an
+overlay over this gap (`MessageBody`), taking no room, so its arrival and
+leaving move nothing (maintainer, 2026-10-29); a composer grown into the gap
+would cover it.
 The transcript's end fade is a band in the chat background over the
 scroller's end (`.chat-scroll-fade--end` in `index.css`; a mask on the
 scroller made the GPU recomposite the whole transcript every frame). It reads
@@ -487,6 +494,33 @@ The composer disables CodeMirror EditContext through `ComposerEditorView`:
 on Android Chrome with Gboard (Thai input, #3514) the EditContext path moved
 the caret into the middle of the draft and reinserted fragments. Generic
 editors (Files, Plan, Skills) keep the base `EditorView` and its EditContext.
+
+On iOS, a keyboard that cleans up dictation (WeChat, #5746) deletes its first
+transcript and writes the cleaned text in batches: it inserts a paragraph `DIV`
+and keeps writing into that same `DIV`. Stock `@codemirror/view` reads the
+paragraph at once and replaces the `DIV` with its own line, so everything the
+keyboard writes after the first paragraph break lands in a detached node and
+never reaches the draft. A temporary Bun patch
+(`bun-patches/@codemirror%2Fview@6.43.15.patch`) reads such a paragraph one
+frame later, with the rest of its batch, and reads it early instead of dropping
+it when the editor updates, takes focus or reads its layout within that
+frame. It applies to every CodeMirror view on iOS, not only the composer. When
+bumping `@codemirror/view`,
+carry the patch over and rerun `editor/__tests__/iosNativeParagraph.test.ts`;
+remove it once a CodeMirror release fixes this. The upstream report is
+https://code.haverbeke.berlin/codemirror/dev/issues/1780; CodeMirror's GitHub
+repositories are an archived mirror.
+
+### Why patch CodeMirror and not work around it in the composer
+
+The paragraph is replaced inside CodeMirror's DOM observer before any
+transaction exists, and any view update in the waiting frame discards the
+observer's unread records. Neither step is reachable through the public API:
+two app-side attempts in #5739 (keeping the latest default transaction, then
+deferring through `beforeinput` and `inputHandler`) each lost text in their own
+checks, because CodeMirror's measure cycle and update path reset the DOM under
+them. The patch is the smallest change at the place the text is lost, and it
+goes away when CodeMirror ships the fix.
 
 The document is not, however, the string it was given: CodeMirror normalizes
 line endings, so a `\r\n` pair becomes one break and the document ends up
@@ -967,7 +1001,14 @@ the composer jumps when the slot resizes. The
 motion starts on the `oc:keyboard-anim` event for its direction, runs on the
 shared keyboard timing (`lib/mobileKeyboardTiming.ts`) the composer slide
 also uses, and ends on `oc:keyboard-settled`; a fallback timer runs it alone
-without a keyboard. The transcript rides it through
+without a keyboard. The keyboard's `keyboardWillShow` often crosses the
+bridge after that timer (up to half a second after the tap in the simulator),
+so the morph runs alone and the keyboard takes the transcript over: the
+morph's `release` never ends a glide a keyboard leg started, only the
+keyboard's settled event does. Ended by the morph, the glide snapped the
+transcript to the end mid-rise. Waiting longer for the keyboard is worse: the
+box growth then lands on the frames WKWebView drops as the keyboard starts,
+and the composer sits under the keyboard for a few frames. The transcript rides it through
 `lib/scroll/keyboardFollowGlide.ts` (owned by `useChatTimelineScroll`): the
 morph announces `oc:composer-morph` (`hold` with how far the transcript's end
 moves, `glide` and `release` when it runs without a keyboard), the glide holds every
@@ -977,19 +1018,40 @@ reduced motion keep the instant swap.
 
 ### WebKit rules for the keyboard choreography
 
-Each of these cost a debugging round on a device:
+Each of these cost a debugging round on a device. The rules that reach beyond
+the composer (compositor easings, inherited custom properties, large hidden
+markup) and how to measure on an iPhone live in the `performance-engineering`
+skill, `references/ios-webkit.md`; `lib/iosWebKitMotion.test.ts` guards them.
 
-- **The chat scroller and its content are never transformed.** WebKit rebuilds
-  composited scrolling layers for that, a multi-second stall on long chats.
+- **The keyboard is a spring.** Traced frame by frame from a recording, the
+  iOS keyboard follows a critically damped spring with a 0.255 s response,
+  settled in 375 ms (`lib/mobileKeyboardTiming.ts`). Everything that follows
+  the keyboard runs on it: transforms, translates and opacity as Web
+  Animations on `keyboardKeyframes` with `easing: 'linear'`, and only what
+  cannot be composited anyway (a height, a `bottom`, a clip) on
+  `KEYBOARD_EASING_CSS`, a `linear()` easing WebKit keeps on the main thread.
+- **Movers slide as Web Animations.** The composer, the riders and
+  `.oc-draft-center` get the final transform inline and a Web Animation from
+  where they stand (`slideMovers` in `apps/mobileNativeChrome.ts`). A CSS
+  transition through a custom property did not reliably start in WebKit.
+- **The chat scroller is never transformed.** WebKit rebuilds composited
+  scrolling layers for that, a multi-second stall on long chats.
   `.chat-scroll` keeps a constant `clientHeight` across keyboard transitions
   (`mobile.css`): it extends below its shrunken region by
   `max(--oc-kb-layout - --oc-app-bottom-safe, 0)` and carries
-  `padding-bottom: --oc-kb-scroll-inset`, so opening or closing the keyboard is
-  one `scrollTop` write over rows already mounted.
-- **Movers get inline transforms.** The composer and `.oc-draft-center` slide
-  with transform/transition set inline by the choreography: WebKit does not
-  reliably start a transition when a transform changes through a CSS custom
-  property.
+  `padding-bottom: --oc-kb-scroll-inset`, so opening or closing the keyboard
+  moves over rows already mounted.
+- **The transcript glides by a transform on its content.** scrollTop moves in
+  whole CSS pixels, and written per frame it moves at 60 Hz: the end of a
+  glide crept in visible one-pixel steps. `keyboardFollowGlide` sets scrollTop
+  once and runs the travel as an upward transform on the list's content (an
+  upward one adds no scrollable overflow), with the opposite one on a stuck
+  user header. A leg on which one sticky header hands over to another cannot
+  be shown by one offset, so it falls back to scrollTop per frame.
+- **Keyboard geometry is written through `lib/mobileKeyboardInsets.ts`.** The
+  three values are registered non-inherited and written on their readers
+  only; a new reader joins the module's selector list. On the root they
+  restyled the whole page on every open and close.
 - **Swap first, then focus in the next frame.** WKWebView stops presenting
   frames once focus starts the keyboard transition and holds the last one until
   about mid-transition, so a swap committed in the same task as `focus()` stays
@@ -1021,10 +1083,11 @@ viewport, so no ancestor root may carry a `transform`, and the header is hidden
 through `oc-browser-kb-fullscreen` instead of out-stacking it. The keyboard
 opens only for a `focus()` inside the tap's own call stack.
 
-When swap and keyboard timing looks wrong, record before guessing: an
-on-screen event timeline (removed in `debug(ui): remove the mobile swap
-timeline overlay`, restorable from git) settled in one screenshot what two
-rounds of plausible fixes could not.
+When swap and keyboard timing looks wrong, measure on the phone before
+guessing: `bun run profile:ios frames` records where the composer, its riders
+and the transcript stand on every frame of a keyboard open, and
+`profile:ios keyboard` times tap to keyboard. The simulator's timing is the
+Mac's, not the phone's.
 
 ## Run in parallel
 

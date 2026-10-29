@@ -64,7 +64,7 @@ const host = connectHost();
 | `stat(path)` | `{ kind, size, mtime }`, `kind` - `file`, `directory`, `other` або `missing`. |
 | `generate({ prompt, system?, maxOutputTokens? })` | одноразовий текст від Small Model користувача. Повертає `{ text }`. Потребує дозволу `model`. |
 | `onResolve(handler)` | зареєструвати обробник ваших слеш-команд. Він отримує `{ command, args }` і повертає елемент для прикріплення або `null`. |
-| `setBadge(count)` | показати число (від 0 до 999) на вашій іконці в рейці або `null`, щоб прибрати його |
+| `setBadge(count)` | позначити вашу іконку в рейці крапкою і показати число (від 0 до 999) у її підказці, або `null`, щоб прибрати його |
 | `openCommit(sha)` | відкрити Diff view на цьому коміті поточного проєкту. `sha` має від 7 до 64 шістнадцяткових символів; OpenChamber сам читає коміт. |
 | `setHeight(px)` | задати висоту вашої секції Work Status. OpenChamber тримає її в межах від 24 до 320 пікселів; вищий вміст прокручується всередині вашої сторінки. В інших місцях ігнорується. |
 | `onFileOpen(listener)` | редактори файлів: отримати файл для редагування, `{ path, name, readOnly }` плюс `encoding: "text"` з `content` або `encoding: "binary"` з `bytes`. Також вмикає збереження за Cmd/Ctrl+S у вашій сторінці. |

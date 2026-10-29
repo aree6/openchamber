@@ -64,7 +64,7 @@ const host = connectHost();
 | `stat(path)` | `{ kind, size, mtime }`。`kind` は `file`、`directory`、`other`、`missing` のいずれか。 |
 | `generate({ prompt, system?, maxOutputTokens? })` | ユーザーの Small Model による一回限りのテキスト。`{ text }` を返す。`model` 権限が必要。 |
 | `onResolve(handler)` | スラッシュコマンドのハンドラーを登録する。`{ command, args }` を受け取り、添付する項目または `null` を返す。 |
-| `setBadge(count)` | レールのアイコンに数字(0 から 999)を表示する。`null` で消す |
+| `setBadge(count)` | レールのアイコンにドットを付け、数字(0 から 999)をツールチップに表示する。`null` で消す |
 | `openCommit(sha)` | 現在のプロジェクトのそのコミットで Diff ビューを開く。`sha` は 7〜64 文字の 16 進数で、コミットは OpenChamber 自身が読み込みます。 |
 | `setHeight(px)` | Work Status セクションの高さを設定する。OpenChamber は 24〜320 ピクセルに収め、それより高い内容はページ内でスクロールします。他の場所では無視されます。 |
 | `onFileOpen(listener)` | ファイルエディター: 編集するファイルを受け取る。`{ path, name, readOnly }` に加えて、`encoding: "text"` なら `content`、`encoding: "binary"` なら `bytes` が入ります。ページ内の Cmd/Ctrl+S でも保存されるようになります。 |

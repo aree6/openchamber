@@ -33,12 +33,10 @@ import {
     type TimelineScrollMode,
 } from '@/components/chat/lib/scroll/timelineScrollAnchoring';
 import {
-    isPositionHeldByFollow,
     isFollowGlideUnderWay,
     resolveFollowGlideTarget,
     resolveFollowStop,
     resolvePageRevealTarget,
-    resolveViewportAtEnd,
 } from '@/components/chat/lib/scroll/followScroll';
 import {
     isFollowReleaseKey,
@@ -145,16 +143,6 @@ interface UseChatTimelineScrollResult {
     showScrollButton: boolean;
     /** A real gesture took the scroll; flips back on any explicit opt-in. */
     userOwnsScroll: boolean;
-    /**
-     * The viewport sits within the re-arm band of the content end, measured
-     * from the scroll position on every scroll event rather than from the
-     * list's at-end transitions (which follow logic may swallow). For
-     * chrome that mirrors the reader's actual position, like the recap hint.
-     * False while the scroll-to-bottom pill is offered: the measurement
-     * runs only on scroll, so growth below a reader the follow stopped for
-     * (the turn footer arriving) left it true under the pill.
-     */
-    viewportAtEnd: boolean;
     /**
      * The viewport is within LOAD_OLDER_REACH_VIEWPORTS of the content's
      * start, where the "Load older" button above the rows is in reach.
@@ -361,7 +349,6 @@ export const useChatTimelineScroll = ({
     // True after a real gesture until an explicit opt back in; drives the
     // overlay scrollbar suppression instead of the anchor's mere existence.
     const [userOwnsScroll, setUserOwnsScroll] = React.useState(false);
-    const [viewportAtEnd, setViewportAtEnd] = React.useState(true);
     const [nearContentStart, setNearContentStart] = React.useState(true);
     const userOwnsScrollRef = React.useRef(userOwnsScroll);
     userOwnsScrollRef.current = userOwnsScroll;
@@ -636,7 +623,6 @@ export const useChatTimelineScroll = ({
         userOwnsScrollRef.current = true;
         setIsPinned(false);
         setUserOwnsScroll(true);
-        setViewportAtEnd(false);
         cancelShowButtonTimer();
         setShowScrollButton(true);
     }, [cancelShowButtonTimer, clearGoToBottomReasserts]);
@@ -1018,7 +1004,6 @@ export const useChatTimelineScroll = ({
         userOwnsScrollRef.current = true;
         setIsPinned(false);
         setUserOwnsScroll(true);
-        setViewportAtEnd(false);
         scheduleShowScrollButton();
     }, [scheduleShowScrollButton]);
     const followEnd = React.useCallback(() => {
@@ -1384,31 +1369,6 @@ export const useChatTimelineScroll = ({
             // so this costs no layout read.
             const viewportLength = listRef.current?.getState().scrollLength ?? 0;
             setNearContentStart(scrollTop < viewportLength * LOAD_OLDER_REACH_VIEWPORTS);
-            // Mid-glide the viewport is legitimately short of the end.
-            if (followGlideHeld()) return;
-            // Following a reply, text runs ahead of the follow glide, and the
-            // distance measured mid-glide flickered in and out of the band
-            // several times a second (the recap hint faded with it). The
-            // distance is read from the node: the list's state is updated a
-            // frame after this event, so it would be stale here.
-            const following = streamingAutoFollowEnabledRef.current
-                && !userOwnsScrollRef.current
-                && isAtEndRef.current
-                && modeRef.current === 'following-end'
-                && isLiveFollowActive();
-            // Held only for a position a follow glide is actually passing
-            // through. A
-            // scroll that did not come from one (the scrollbar thumb, find in
-            // page, scrollIntoView) is measured.
-            const held = isPositionHeldByFollow(
-                following,
-                glideRef.current,
-                scrollTop,
-                performance.now(),
-            );
-            setViewportAtEnd(resolveViewportAtEnd(held, () => (
-                scrollNode.scrollHeight - scrollNode.clientHeight - scrollTop <= TIMELINE_FOLLOW_REARM_THRESHOLD_PX
-            )));
         };
 
         scrollNode.addEventListener('wheel', handleWheel, { passive: true });
@@ -1454,7 +1414,6 @@ export const useChatTimelineScroll = ({
         linkServedRef.current = null;
         isAtEndRef.current = true;
         setUserOwnsScroll(false);
-        setViewportAtEnd(true);
         setNearContentStart(true);
         glideRef.current = null;
         modeRef.current = 'following-end';
@@ -1773,7 +1732,6 @@ export const useChatTimelineScroll = ({
         onTimelineDataChange,
         showScrollButton,
         userOwnsScroll,
-        viewportAtEnd: viewportAtEnd && !showScrollButton,
         nearContentStart,
         isFollowingProgrammatically,
         goToBottom,

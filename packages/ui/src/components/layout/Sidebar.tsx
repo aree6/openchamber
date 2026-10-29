@@ -216,14 +216,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, isMobile, children, cl
             ref={sidebarRef}
             data-left-sidebar=""
             className={cn(
-                'relative flex h-full border-e border-border',
+                'relative flex h-full',
                 !peeking && 'overflow-hidden',
                 // In the class, not the inline style: an inline transition
                 // outranked `motion-reduce:transition-none`, so the sidebar
                 // still animated for readers who asked for reduced motion.
                 isResizing ? 'transition-none' : 'transition-[width,min-width,max-width] motion-reduce:transition-none',
                 'bg-sidebar',
-                !isOpen && 'border-e-0',
                 className,
             )}
             style={{
@@ -237,8 +236,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, isMobile, children, cl
             }}
         >
             {isOpen && (
+                // The edge toward the chat: a half-pixel hairline, drawn as a
+                // shadow above the content so it never takes width.
                 <div
-                    className="pointer-events-none absolute inset-0 z-30 shadow-[inset_-2px_0_10px_-2px_rgb(0_0_0_/_0.06)] rtl:shadow-[inset_2px_0_10px_-2px_rgb(0_0_0_/_0.06)]"
+                    className="pointer-events-none absolute inset-0 z-30 shadow-[inset_-0.5px_0_0_0_var(--oc-edge-strong)] rtl:shadow-[inset_0.5px_0_0_0_var(--oc-edge-strong)]"
                     aria-hidden="true"
                 />
             )}
@@ -265,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, isMobile, children, cl
                     peeking
                         // Above the chat, the header and the zones; under the
                         // titlebar controls (z-30).
-                        ? 'absolute inset-s-0 top-0 z-[25] border-e border-border bg-sidebar shadow-xl'
+                        ? 'absolute inset-s-0 top-0 z-[25] bg-sidebar shadow-xl'
                         : 'relative z-10 transition-opacity ease-out motion-reduce:transition-none',
                     isResizing && 'pointer-events-none',
                     !isOpen && !peeking && 'pointer-events-none select-none opacity-0'
@@ -285,7 +286,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, isMobile, children, cl
                 onAnimationEnd={peeking ? peek?.overlayHandlers.onAnimationEnd : undefined}
             >
                 {topBar}
-                <ScrollableOverlay outerClassName="flex-1 min-h-0" disableHorizontal>
+                {/* A frame around the sidebar's own scrollers: it reserves no
+                    gutter, or the list's thumb would sit a second gutter in. */}
+                <ScrollableOverlay outerClassName="overlay-scrollbar-wrapper--no-gutter flex-1 min-h-0" disableHorizontal>
                     <ErrorBoundary>{children}</ErrorBoundary>
                 </ScrollableOverlay>
             </aside>

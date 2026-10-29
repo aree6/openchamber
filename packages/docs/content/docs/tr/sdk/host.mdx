@@ -64,7 +64,7 @@ Erişim token'ları burada da, `request` sonucunda da asla görünmez.
 | `stat(path)` | `{ kind, size, mtime }`, `kind` `file`, `directory`, `other` veya `missing` olur. |
 | `generate({ prompt, system?, maxOutputTokens? })` | kullanıcının Small Model'inden tek seferlik metin. `{ text }` döndürür. `model` yeteneği gerekir. |
 | `onResolve(handler)` | eğik çizgi komutlarınız için işleyiciyi kaydeder. `{ command, args }` alır ve iliştirilecek bir öğe ya da `null` döndürür. |
-| `setBadge(count)` | şerit simgenizde bir sayı (0 ile 999 arası) gösterir, `null` ile temizler |
+| `setBadge(count)` | şerit simgenizi bir noktayla işaretler ve sayıyı (0 ile 999 arası) ipucunda gösterir, `null` ile temizler |
 | `openCommit(sha)` | geçerli projenin o commit'inde Diff görünümünü açar. `sha` 7 ile 64 onaltılık karakterdir; commit'i OpenChamber kendisi okur. |
 | `setHeight(px)` | Work Status bölümünüzün yüksekliğini ayarlar. OpenChamber bunu 24 ile 320 piksel arasında tutar; daha uzun içerik sayfanızın içinde kayar. Başka yerlerde yok sayılır. |
 | `onFileOpen(listener)` | dosya düzenleyiciler: düzenlenecek dosyayı alır, `{ path, name, readOnly }` ile birlikte `encoding: "text"` ve `content` ya da `encoding: "binary"` ve `bytes`. Ayrıca sayfanızda Cmd/Ctrl+S ile kaydetmeyi sağlar. |

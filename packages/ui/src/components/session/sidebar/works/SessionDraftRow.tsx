@@ -56,7 +56,8 @@ export function SessionDraftRow({ draft, depth, detailed, mixed, alwaysShowActio
         if (isRowBoxClick(event)) open();
       }}
       className={cn(
-        'group/draft relative my-0.5 flex cursor-pointer select-none rounded-md py-1.5 pe-2.5',
+        'group/draft relative my-0.5 flex cursor-pointer select-none rounded-md pe-2.5',
+        detailed ? 'py-1.5' : 'py-[5px]',
         detailed ? 'flex-col gap-px' : 'items-center gap-1.5',
         isOpen ? 'bg-interactive-selection/70 text-interactive-selection-foreground' : 'hover:bg-interactive-hover/60',
       )}

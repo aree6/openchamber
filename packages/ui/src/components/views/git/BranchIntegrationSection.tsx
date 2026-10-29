@@ -426,7 +426,7 @@ export const BranchIntegrationSection: React.FC<BranchIntegrationSectionProps> =
   if (mode === 'inline') {
     return (
       <section className="border-0 bg-transparent rounded-none">
-        <header className="border-b border-border/40 px-0 py-3">
+        <header className="border-b border-edge-muted px-0 py-3">
           <div className="space-y-1">
             <div className="typography-ui-header font-semibold text-foreground">{t('gitView.branch.updateTitle')}</div>
             <div className="typography-micro text-muted-foreground">

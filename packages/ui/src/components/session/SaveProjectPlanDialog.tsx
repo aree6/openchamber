@@ -57,7 +57,7 @@ export function SaveProjectPlanDialog(props: SaveProjectPlanDialogProps) {
 
           <div className="space-y-1.5">
             <label className="typography-ui-label font-medium text-foreground">{t('saveProjectPlanDialog.field.contentPreview')}</label>
-            <div className="max-h-40 overflow-auto rounded-lg border border-border/70 bg-[var(--surface-subtle)] px-3 py-2 typography-meta text-foreground">
+            <div className="max-h-40 overflow-auto rounded-lg border border-edge bg-[var(--surface-subtle)] px-3 py-2 typography-meta text-foreground">
               {sourceText}
             </div>
           </div>

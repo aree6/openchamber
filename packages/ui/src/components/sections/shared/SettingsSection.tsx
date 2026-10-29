@@ -142,7 +142,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
       data-settings-item={settingsItem}
       className={cn(
         'space-y-5',
-        divider ? 'border-t border-border/60 py-8' : 'pb-8',
+        divider ? 'border-t border-edge py-8' : 'pb-8',
         className,
       )}
     >

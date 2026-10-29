@@ -278,7 +278,7 @@ export const WorkflowAgentsView: React.FC<{ run: WorkflowRun; directory: string 
           );
         })}
       </div>
-      <div className="flex shrink-0 flex-wrap items-center gap-x-1.5 border-t border-border/60 px-3 py-2 typography-micro text-muted-foreground">
+      <div className="flex shrink-0 flex-wrap items-center gap-x-1.5 border-t border-edge px-3 py-2 typography-micro text-muted-foreground">
         <span className="tabular-nums" dir="auto">{t('workflows.panel.summary.agents', { done, total: run.agents.length })}</span>
         {run.startedAt !== undefined ? (
           <>

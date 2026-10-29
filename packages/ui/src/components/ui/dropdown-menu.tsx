@@ -2,6 +2,7 @@ import * as React from "react"
 import { Menu as BaseMenu } from "@base-ui/react/menu"
 
 import { cn } from "@/lib/utils"
+import { useHeightMorphRef } from "@/lib/motion/useSizeMorph"
 import { Icon } from "@/components/icon/Icon";
 import { shortcutRegistry } from "@/lib/shortcuts";
 import { handleDropdownNavigationKey } from "./dropdown-navigation";
@@ -162,10 +163,27 @@ function DropdownMenuContent({
   children,
   onCloseAutoFocus,
   onKeyDown,
+  ref,
   ...props
 }: ContentProps) {
   const portalContext = React.useContext(DropdownPortalContext);
   void onCloseAutoFocus
+  // Content that changes while the menu is open (a filtered picker list,
+  // items that arrive late) eases the popup into its new height.
+  const morphHeight = useHeightMorphRef();
+  // Returns its cleanup (React 19), so a caller's ref keeps its own: a
+  // cleanup it returned runs, else it gets null as before.
+  const setPopupRef = React.useCallback((node: HTMLDivElement | null) => {
+    morphHeight(node);
+    const cleanup = typeof ref === 'function' ? ref(node) : undefined;
+    if (ref && typeof ref !== 'function') ref.current = node;
+    return () => {
+      morphHeight(null);
+      if (typeof cleanup === 'function') cleanup();
+      else if (typeof ref === 'function') ref(null);
+      else if (ref) ref.current = null;
+    };
+  }, [morphHeight, ref]);
 
   const handleKeyDown: NonNullable<React.ComponentProps<typeof BaseMenu.Popup>['onKeyDown']> = (event) => {
     onKeyDown?.(event);
@@ -190,6 +208,7 @@ function DropdownMenuContent({
         className={cn("app-region-no-drag z-50", positionerClassName)}
       >
         <BaseMenu.Popup
+          ref={setPopupRef}
           data-slot="dropdown-menu-content"
           style={{
             color: 'var(--surface-elevated-foreground)',

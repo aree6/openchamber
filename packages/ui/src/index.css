@@ -853,18 +853,18 @@ html:not(.dark) .chat-scroll {
 }
 
 /* Overlay scrollbar styling (custom thumb) */
-/* Reserve the thumb's 6px width, 4px right inset and a 4px content gap.
-   Follow overflow, not hover visibility, so showing the thumb never shifts text.
-   Direct-child matching prevents nested scrollers from reserving space twice. */
-.overlay-scrollbar-wrapper:has(> .overlay-scrollbar > .overlay-scrollbar__thumb--vertical:not([hidden])) {
+/* Every overlay scroller reserves the thumb's room up front, whether or not
+   its content overflows now: a list that crosses the threshold (projects
+   folding and opening, a catalog loading) must not shift its text sideways
+   when the thumb appears. */
+.overlay-scrollbar-wrapper {
   padding-right: 6px;
 }
 
-/* Settings pages cross the overflow threshold all the time (collapsible
-   sections, catalogs loading), so they reserve the thumb's space up front
-   instead of shifting content the moment a scrollbar appears. */
-.overlay-scrollbar-wrapper--stable-gutter {
-  padding-right: 6px;
+/* A wrapper that only frames other scrollers takes none, so a nested
+   scroller's thumb stays at the edge. */
+.overlay-scrollbar-wrapper.overlay-scrollbar-wrapper--no-gutter {
+  padding-right: 0;
 }
 
 .overlay-scrollbar {
@@ -882,11 +882,18 @@ html:not(.dark) .chat-scroll {
   opacity: 1;
 }
 
+/* The thumb is drawn 4px thick (6px under the pointer) inside a 10px hit
+   area: transparent borders on its long sides take the grab, and the fill
+   stops at the padding box. */
 .overlay-scrollbar__thumb {
   pointer-events: none;
   position: absolute;
-  width: 6px;
+  box-sizing: border-box;
+  width: 10px;
+  border: 0 solid transparent;
+  border-inline-width: 3px;
   background: var(--oc-scrollbar-thumb);
+  background-clip: padding-box;
   border-radius: 9999px;
   opacity: 0.8;
   transition: background-color 0.15s ease, opacity 0.15s ease;
@@ -900,12 +907,22 @@ html:not(.dark) .chat-scroll {
 .overlay-scrollbar__thumb:hover,
 .overlay-scrollbar__thumb:active {
   background: var(--oc-scrollbar-thumb-hover);
+  background-clip: padding-box;
+  border-inline-width: 2px;
   opacity: 1;
 }
 
 .overlay-scrollbar__thumb--horizontal {
-  height: 6px;
+  height: 10px;
+  border-inline-width: 0;
+  border-block-width: 3px;
   margin: 0;
+}
+
+.overlay-scrollbar__thumb--horizontal:hover,
+.overlay-scrollbar__thumb--horizontal:active {
+  border-inline-width: 0;
+  border-block-width: 2px;
 }
 
 .overlay-scrollbar__thumb--vertical {
@@ -1302,7 +1319,8 @@ diffs-container {
   display: flex;
   align-items: center;
   min-width: 0;
-  flex: 1 1 auto;
+  /* As wide as its facts, so the actions sit right after them. */
+  flex: 0 1 auto;
   overflow: hidden;
 }
 

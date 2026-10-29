@@ -174,7 +174,7 @@ export const BackgroundShellsStrip: React.FC<BackgroundShellsStripProps> = React
 
   if (shells.length === 1) {
     return (
-      <div role="group" className="border-b border-border/60" aria-label={t('chat.backgroundShells.aria')}>
+      <div role="group" className="border-b border-edge" aria-label={t('chat.backgroundShells.aria')}>
         {row(shells[0])}
       </div>
     );
@@ -183,7 +183,7 @@ export const BackgroundShellsStrip: React.FC<BackgroundShellsStripProps> = React
   // The header toggles the list, as the queue header does, and stops every
   // command in it at once.
   return (
-    <div role="group" className="border-b border-border/60" aria-label={t('chat.backgroundShells.aria')}>
+    <div role="group" className="border-b border-edge" aria-label={t('chat.backgroundShells.aria')}>
       <div className="flex oc-composer-row items-center gap-2 ps-3 pe-1.5">
         <Button
           type="button"

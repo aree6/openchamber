@@ -109,7 +109,7 @@ export const ContextRailTooltipDetails: React.FC = () => {
   ];
 
   return (
-    <div className="mt-1 flex flex-col gap-0.5 border-t border-border/60 pt-1 tabular-nums">
+    <div className="mt-1 flex flex-col gap-0.5 border-t border-edge pt-1 tabular-nums">
       {lines.map((line) => (
         <span key={line} className="typography-micro text-muted-foreground">{line}</span>
       ))}

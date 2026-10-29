@@ -158,7 +158,7 @@ export const MobileWorktreeRow: React.FC<{
         chevron={toggle ? <MobileRowChevron expanded={expanded} kind="work" label={label} onToggle={toggle} /> : null}
         firstLine={renaming
           ? renameForm(0, 'h-[1lh] pe-0 typography-ui-label [&_button]:size-6 [&_button>svg]:size-3.5')
-          : <>{titleText}{pinMark}{missing}{directoryIndicator}{stateMark}{duration}</>}
+          : <>{titleText}{missing}{pinMark}{directoryIndicator}{stateMark}{duration}</>}
         secondLine={<>
           {mixedProject ? <MobileProjectIcon project={mixedProject} size="xs" /> : null}
           {branchMark}
@@ -180,9 +180,10 @@ export const MobileWorktreeRow: React.FC<{
           aria-label={t('sessions.sidebar.work.openAria', { label })}
           onClick={select}
         >
+          {/* The desktop work row's order. */}
           {titleText}
-          {pinMark}
           {missing}
+          {pinMark}
           {ref}
           {directoryIndicator}
           {stateMark}

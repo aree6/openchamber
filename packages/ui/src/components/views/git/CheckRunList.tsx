@@ -176,7 +176,7 @@ export const CheckRunList: React.FC<{
             ) : null}
           </button>
           {expanded && hasDetails ? (
-            <div className="min-w-0 overflow-hidden border-t border-border/40 p-2.5">
+            <div className="min-w-0 overflow-hidden border-t border-edge-muted p-2.5">
               <CheckRunDetails run={run} expansion={expansion} formatTimestamp={formatTimestamp} />
             </div>
           ) : null}

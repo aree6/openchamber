@@ -29,6 +29,9 @@ import {
 } from '../composer/comment/MobileCommentComposerContext';
 import { rangeToMarkdown, trimSelectionValue, wrapMarkdownSelectionForChat } from './selectionMarkdown';
 import { registerActiveSelectionToolbar } from '@/lib/addSelectionToChat';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/shortcuts';
 import { collectSelectionOverlayRects } from '@/lib/selectionOverlayRects';
 import { frameRectInApp, onFrameSelection } from './frameSelection';
 import { captureChatQuoteAnchor, type ChatQuoteAnchor } from '@/lib/chatQuoteAnchor';
@@ -153,6 +156,7 @@ const TextSelectionMenuImpl: React.FC<TextSelectionMenuProps> = ({ containerRef,
   const setPendingInputText = useInputStore((state) => state.setPendingInputText);
   const requestBtwComposer = useInputStore((state) => state.requestBtwComposer);
   const isMobile = useUIStore((state) => state.isMobile);
+  const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
   const projects = useProjectsStore((state) => state.projects);
   const availableWorktreesByProject = useSessionUIStore((state) => state.availableWorktreesByProject);
   const effectiveDirectory = useEffectiveDirectory();
@@ -856,6 +860,8 @@ const TextSelectionMenuImpl: React.FC<TextSelectionMenuProps> = ({ containerRef,
               <span className="whitespace-normal hyphens-auto">{t('chat.textSelection.actions.comment')}</span>
             </button>
 
+            <Tooltip>
+            <TooltipTrigger asChild>
             <button
               onClick={handleAddToChat}
               className={cn(
@@ -865,12 +871,15 @@ const TextSelectionMenuImpl: React.FC<TextSelectionMenuProps> = ({ containerRef,
                 'active:opacity-80',
                 'transition-opacity duration-150'
               )}
-              title={t('chat.textSelection.title.addToCurrentChat')}
+              aria-label={t('chat.textSelection.title.addToCurrentChat')}
               type="button"
             >
               <Icon name="add" className="h-5 w-5 flex-shrink-0" />
               <span className="whitespace-normal hyphens-auto">{t('chat.textSelection.actions.addToInput')}</span>
             </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6}><TooltipLabelWithShortcut label={t('chat.textSelection.title.addToCurrentChat')} shortcut={formatShortcutForDisplay(getEffectiveShortcutCombo('add_selection_to_chat', shortcutOverrides), '')} /></TooltipContent>
+            </Tooltip>
 
             {canReadAloud ? (
               <button

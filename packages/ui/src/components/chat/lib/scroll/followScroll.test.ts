@@ -1,14 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 
 import {
-    AUTOMATIC_MOVEMENT_MAX_MS,
     GLIDE_START_GRACE_MS,
     isFollowGlideUnderWay,
-    isPositionHeldByFollow,
     resolveFollowGlideTarget,
     resolveFollowStop,
     resolvePageRevealTarget,
-    resolveViewportAtEnd,
 } from './followScroll';
 
 describe('resolveFollowGlideTarget', () => {
@@ -68,39 +65,5 @@ describe('isFollowGlideUnderWay', () => {
         // Stopped short where it landed: the scroll no longer moves.
         expect(isFollowGlideUnderWay(glide, 1000, 1400, 500)).toBe(false);
         expect(isFollowGlideUnderWay(null, 1100, 1400, 500)).toBe(false);
-    });
-});
-
-describe('isPositionHeldByFollow', () => {
-    const glide = { from: 1000, target: 1400, issuedAt: 0 };
-
-    test('holds positions a recent follow glide passes through', () => {
-        expect(isPositionHeldByFollow(true, glide, 1000, 100)).toBe(true);
-        expect(isPositionHeldByFollow(true, glide, 1200, 100)).toBe(true);
-        expect(isPositionHeldByFollow(true, glide, 1400, 100)).toBe(true);
-    });
-
-    test('measures a scroll the glide does not account for', () => {
-        // The thumb or find in page took the viewport above the glide.
-        expect(isPositionHeldByFollow(true, glide, 600, 100)).toBe(false);
-        // A glide long finished explains nothing.
-        expect(isPositionHeldByFollow(true, glide, 1400, AUTOMATIC_MOVEMENT_MAX_MS)).toBe(false);
-        expect(isPositionHeldByFollow(true, null, 1400, 100)).toBe(false);
-        // The reader took the scroll.
-        expect(isPositionHeldByFollow(false, glide, 1200, 100)).toBe(false);
-    });
-});
-
-describe('resolveViewportAtEnd', () => {
-    test('stays at the end for a held position, without measuring', () => {
-        let measured = 0;
-        const measureAway = () => { measured += 1; return false; };
-        expect(resolveViewportAtEnd(true, measureAway)).toBe(true);
-        expect(measured).toBe(0);
-    });
-
-    test('takes the measured answer otherwise', () => {
-        expect(resolveViewportAtEnd(false, () => false)).toBe(false);
-        expect(resolveViewportAtEnd(false, () => true)).toBe(true);
     });
 });

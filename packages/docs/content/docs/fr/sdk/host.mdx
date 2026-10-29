@@ -64,7 +64,7 @@ Les tokens d'accès n'apparaissent jamais ici ni dans un résultat de `request`.
 | `stat(path)` | `{ kind, size, mtime }`, `kind` vaut `file`, `directory`, `other` ou `missing`. |
 | `generate({ prompt, system?, maxOutputTokens? })` | texte ponctuel du Small Model de l'utilisateur. Renvoie `{ text }`. Nécessite la capacité `model`. |
 | `onResolve(handler)` | enregistre le gestionnaire de vos commandes slash. Il reçoit `{ command, args }` et renvoie un élément à attacher ou `null`. |
-| `setBadge(count)` | affiche un nombre (0 à 999) sur votre icône de la barre latérale, ou `null` pour l'effacer |
+| `setBadge(count)` | marque votre icône de la barre latérale d'un point et affiche le nombre (0 à 999) dans son infobulle, ou `null` pour l'effacer |
 | `openCommit(sha)` | ouvrir la vue Diff sur ce commit du projet courant. `sha` fait de 7 à 64 caractères hexadécimaux ; OpenChamber lit le commit lui-même. |
 | `setHeight(px)` | régler la hauteur de votre section Work Status. OpenChamber la maintient entre 24 et 320 pixels ; un contenu plus haut défile dans votre page. Ailleurs, c'est ignoré. |
 | `onFileOpen(listener)` | éditeurs de fichiers : recevoir le fichier à modifier, `{ path, name, readOnly }` plus `encoding: "text"` avec `content`, ou `encoding: "binary"` avec `bytes`. Permet aussi d'enregistrer avec Cmd/Ctrl+S dans votre page. |

@@ -164,7 +164,7 @@ export const MobileInstancesSurface: React.FC<{
       <div className="flex h-full flex-col overflow-hidden">
         <form className="flex-1 overflow-y-auto px-5 py-4" onSubmit={handlePasswordSubmit}>
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-3 rounded-[18px] border border-border/70 bg-surface-elevated px-3.5 py-3">
+            <div className="flex items-center gap-3 rounded-[18px] border border-edge bg-surface-elevated px-3.5 py-3">
               <span className="flex size-9 shrink-0 items-center justify-center rounded-[12px] bg-interactive-hover text-foreground">
                 <Icon name="lock" className="size-[18px]" />
               </span>
@@ -207,7 +207,7 @@ export const MobileInstancesSurface: React.FC<{
       <div className="flex-1 overflow-y-auto px-5 py-4">
         <div className="space-y-6">
           {connections.length > 0 ? (
-            <div {...debugLongPress} className="overflow-hidden rounded-[18px] border border-border/70 bg-surface-elevated">
+            <div {...debugLongPress} className="overflow-hidden rounded-[18px] border border-edge bg-surface-elevated">
               {connections.map((connection) => {
                 const confirming = confirmingDeleteId === connection.id;
                 const isActive = isActiveRuntimeConnection(connection);
@@ -223,7 +223,7 @@ export const MobileInstancesSurface: React.FC<{
                   <div
                     key={connection.id}
                     className={cn(
-                      'flex items-center border-b border-border/70 transition-colors last:border-b-0',
+                      'flex items-center border-b border-edge transition-colors last:border-b-0',
                       confirming && 'bg-[color-mix(in_srgb,var(--destructive)_8%,transparent)]',
                     )}
                   >
@@ -301,7 +301,7 @@ export const MobileInstancesSurface: React.FC<{
               })}
             </div>
           ) : (
-            <p {...debugLongPress} className="rounded-[18px] border border-dashed border-border/70 px-4 py-6 text-center typography-small text-muted-foreground">
+            <p {...debugLongPress} className="rounded-[18px] border border-dashed border-edge px-4 py-6 text-center typography-small text-muted-foreground">
               {t('mobile.connect.saved.empty')}
             </p>
           )}

@@ -126,7 +126,7 @@ function DialogContent({
             // The canvas tone, like the Settings window: in themes whose
             // elevated surface is lighter, a dialog would otherwise read as a
             // grey slab over the dimmed app.
-            "oc-window-corners relative pointer-events-auto outline-none bg-background flex flex-col w-full max-w-lg max-h-full gap-4 border p-5 oc-modal-shadow overflow-y-auto pwa-dialog-content origin-center",
+            "oc-window-corners relative pointer-events-auto outline-none bg-background flex flex-col w-full max-w-lg max-h-full gap-4 p-5 oc-modal-shadow overflow-y-auto pwa-dialog-content origin-center",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:opacity-0 data-[starting-style]:scale-[0.98]",
             "data-[ending-style]:opacity-0 data-[ending-style]:scale-[0.98]",

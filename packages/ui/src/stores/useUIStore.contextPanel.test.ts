@@ -1139,7 +1139,9 @@ describe('useUIStore contextRailOrder', () => {
     const ordered = sortContextSurfaces(['browser', 'unknown-id', 'diff']);
     const ids = ordered.map((surface) => surface.id);
 
-    expect(ids.slice(0, 2)).toEqual(['browser', 'diff']);
+    // The saved order places each group where its first surface stands, and
+    // the group's other surfaces follow it: Browser brings the tools.
+    expect(ids.slice(0, 4)).toEqual(['browser', 'editor', 'terminal', 'diff']);
     // Assert against the registry itself so this test cannot go stale when a
     // surface is added or removed.
     expect(new Set(ids)).toEqual(new Set(CONTEXT_SURFACES.map((surface) => surface.id)));

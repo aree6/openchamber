@@ -54,25 +54,25 @@ const PreviewFrame: React.FC<{ pinned: boolean; header: React.ReactNode; meta: R
         return (
             <article className={cn('flex flex-col gap-4', ZOOMABLE_IMAGE_CLASS)} onClick={imagePreview.onClick}>
                 <header className="flex flex-col gap-2">{header}</header>
-                <div className="border-b border-border/60 pb-4">{meta}</div>
+                <div className="border-b border-edge pb-4">{meta}</div>
                 {children}
-                <div className="rounded-lg border border-border/60 px-3 py-2.5">{footer}</div>
+                <div className="rounded-lg border border-edge px-3 py-2.5">{footer}</div>
                 {imagePreview.viewer}
             </article>
         );
     }
     return (
         <div className="flex h-full min-h-0 flex-col">
-            <div className="shrink-0 border-b border-border/60 px-6 pb-4 pt-5">
+            <div className="shrink-0 border-b border-edge px-6 pb-4 pt-5">
                 <header className="flex flex-col gap-2">{header}</header>
             </div>
             <ScrollableOverlay outerClassName="min-h-0 flex-1" className="px-6 pb-5 pt-4" disableHorizontal>
                 <article className={cn('flex flex-col gap-4', ZOOMABLE_IMAGE_CLASS)} onClick={imagePreview.onClick}>
-                    <div className="border-b border-border/60 pb-4">{meta}</div>
+                    <div className="border-b border-edge pb-4">{meta}</div>
                     {children}
                 </article>
             </ScrollableOverlay>
-            <div className="shrink-0 border-t border-border/60 px-6 py-3">{footer}</div>
+            <div className="shrink-0 border-t border-edge px-6 py-3">{footer}</div>
             {imagePreview.viewer}
         </div>
     );
@@ -262,7 +262,7 @@ const CommentsSection: React.FC<{
     const { t } = useI18n();
     const shown = state.status === 'ready' ? state.value.filter((entry) => entry.kind === 'comment').length : 0;
     return (
-        <section className="flex flex-col gap-3 border-t border-border/60 pt-4">
+        <section className="flex flex-col gap-3 border-t border-edge pt-4">
             <h4 className="flex items-center gap-2 typography-ui-label font-semibold text-foreground">
                 {t(activity ? 'references.picker.preview.activity' : 'references.picker.preview.comments')}
                 {state.status === 'ready' && total !== null && total > shown ? (
@@ -616,7 +616,7 @@ const RepositoryPreview: React.FC<{
             }
         >
             {stack ? (
-                <section className="flex flex-col gap-2 border-b border-border/60 pb-4">
+                <section className="flex flex-col gap-2 border-b border-edge pb-4">
                     <h4 className="flex items-center gap-2 typography-ui-label font-semibold text-foreground">
                         {t('stacks.preview.label')}
                         {stackPosition > 0 ? (
@@ -704,7 +704,7 @@ const SubIssuesSection: React.FC<{
     if (subIssues.length === 0) return null;
     const done = subIssues.filter((sub) => isSettledTrackerState(sub.state?.category)).length;
     return (
-        <section className="flex flex-col gap-2 border-t border-border/60 pt-4">
+        <section className="flex flex-col gap-2 border-t border-edge pt-4">
             <h4 className="flex items-center gap-2 typography-ui-label font-semibold text-foreground">
                 {t('references.picker.preview.subIssues')}
                 {issue.childrenMore ? null : (

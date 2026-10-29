@@ -70,7 +70,7 @@ export const CustomProviderModelRow: React.FC<Props> = ({
   );
 
   return (
-    <div className="border-b border-border/50 last:border-b-0">
+    <div className="border-b border-edge last:border-b-0">
       <div className="flex items-center gap-1 py-1">
         <button
           type="button"

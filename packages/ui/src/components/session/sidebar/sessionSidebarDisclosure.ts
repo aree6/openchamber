@@ -17,6 +17,7 @@ export const SIDEBAR_DISCLOSURE_EASING = 'ease-out';
 const disclosureOpen = (row: SessionSidebarRow): boolean | null => {
   switch (row.kind) {
     case 'activity-header':
+    case 'caption':
     case 'project-header':
     case 'group-header':
     case 'folder-header':

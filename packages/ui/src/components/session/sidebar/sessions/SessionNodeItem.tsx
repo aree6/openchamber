@@ -1,7 +1,9 @@
 import { DirectoryActionIndicator } from './DirectoryActionIndicator';
+import { formatShortcutForDisplay, getEffectiveShortcutCombo } from '@/lib/shortcuts';
 import { useSessionTurnActivity } from '@/sync/global-session-status';
 import { getSessionActivityTime } from '@/sync/session-ordering';
 import React from 'react';
+import { TooltipLabelWithShortcut } from '@/components/ui/action-toolbar';
 import { leaveFinishedSessions } from '@/lib/sessionTabs';
 import { SessionActivityIndicator } from '@/components/session/SessionActivityIndicator';
 import type { Session } from '@/lib/opencode/model';
@@ -231,6 +233,7 @@ const holdSessionRowPosition = (target: HTMLElement): void => {
 };
 
 type QuickSessionActionProps = {
+  shortcut?: string;
   archiveLabel: string;
   deleteLabel: string;
   buttonSizeClass: string;
@@ -244,6 +247,7 @@ type QuickSessionActionProps = {
 // Extracted so only this small button re-renders when Shift is pressed/released,
 // instead of every mounted session row.
 const QuickSessionAction = React.memo(function QuickSessionAction({
+  shortcut,
   archiveLabel,
   deleteLabel,
   buttonSizeClass,
@@ -286,7 +290,7 @@ const QuickSessionAction = React.memo(function QuickSessionAction({
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" sideOffset={6}>
-        {label}
+        <TooltipLabelWithShortcut label={label} shortcut={shiftHeld ? undefined : shortcut} />
       </TooltipContent>
     </Tooltip>
   );
@@ -440,6 +444,9 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
   // The row is selected while its session is what the screen shows: a run's
   // overview covers it, and then the run's row is the selected one.
   const isCurrentSession = useSessionUIStore((state) => state.currentSessionId === session.id);
+  const shortcutOverrides = useUIStore((state) => state.shortcutOverrides);
+  const renameShortcut = formatShortcutForDisplay(getEffectiveShortcutCombo('rename_current_session', shortcutOverrides), '');
+  const archiveShortcut = formatShortcutForDisplay(getEffectiveShortcutCombo('archive_current_session', shortcutOverrides), '');
   const runOverviewOpen = useUIStore((state) => state.runOverviewKey !== null);
   const isActive = isCurrentSession && !runOverviewOpen;
 
@@ -892,7 +899,7 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
         style={{ paddingInlineStart: sessionTreeRowPaddingLeft(depth) }}
         // my-0.5 matches the normal row box so entering rename mode does not
         // shift the row vertically; the empty slot keeps the title in place.
-        className="group relative my-0.5 flex items-center gap-1.5 rounded-md py-1.5 pe-2.5"
+        className="group relative my-0.5 flex items-center gap-1.5 rounded-md py-[5px] pe-2.5"
       >
         <span aria-hidden className="h-3.5 w-3.5 flex-shrink-0" />
         <div className="flex min-w-0 flex-1 flex-col gap-0">
@@ -934,18 +941,22 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
   const pinnedMarkerContent = (
     <RowMarkTooltip label={pinnedLabel}>
       <span className="inline-flex flex-shrink-0 items-center" aria-label={pinnedLabel}>
-        <Icon name="pushpin" className="h-3 w-3 text-primary" />
+        <Icon name="pushpin" className="h-3 w-3 text-muted-foreground" />
       </span>
     </RowMarkTooltip>
   );
   const sessionActionSpinner = (
     <Icon
       name="loader-4"
-      className="h-3 w-3 flex-shrink-0 animate-spin text-primary"
+      className="h-3 w-3 flex-shrink-0 animate-spin text-status-info"
       aria-label={isAiRenaming ? t('sessions.aiRename.generating') : t('sessions.sidebar.session.status.movingToWorktree')}
     />
   );
-  const liveStateMark = isSessionActionPending ? sessionActionSpinner : showStatusMarker ? statusMarkerContent : null;
+  // A request waiting on the user stands for the turn: the session is stopped
+  // on it, so the running mark and its timer step aside for the one warning
+  // mark (the timer reads its start from the store and resumes where it is).
+  const waitingOnUser = hasPendingPermission || hasPendingForm;
+  const liveStateMark = isSessionActionPending ? sessionActionSpinner : showStatusMarker && !waitingOnUser ? statusMarkerContent : null;
   // Grouped rows are file tree rows: one indent per level, then a slot left
   // of the title. The slot says what a row is (a worktree's branch, a run's
   // mark, a session's chevron when it has subsessions) and never its state:
@@ -1218,6 +1229,7 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
       >
         <Icon name="pencil-ai" className="me-1 h-4 w-4" />
         {t('sessions.sidebar.session.menu.rename')}
+        {isCurrentSession && renameShortcut ? <span className="ms-auto ps-3 typography-meta text-muted-foreground">{renameShortcut}</span> : null}
       </Item>
       </SessionMenuItemHint>
       <SessionAiRenameMenuItem sessionID={session.id} directory={sessionDirectory} open={isSessionMenuOpen} Item={Item} />
@@ -1494,6 +1506,7 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
         <Item className="[&>svg]:me-1" onClick={() => handleDeleteSession(session, { archivedBucket })}>
           <Icon name="inbox-archive" className="me-1 h-4 w-4" />
           {t('sessions.sidebar.bulkActions.archive')}
+          {isCurrentSession && archiveShortcut ? <span className="ms-auto ps-3 typography-meta text-muted-foreground">{archiveShortcut}</span> : null}
         </Item>
         </SessionMenuItemHint>
       ) : null}
@@ -1546,14 +1559,14 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
     <>
       {hasPendingPermission ? (
         <RowMarkTooltip label={permissionLabel}>
-          <span className="inline-flex flex-shrink-0 items-center rounded bg-destructive/10 px-1 py-0.5 text-destructive" aria-label={permissionLabel}>
+          <span className="inline-flex flex-shrink-0 items-center text-status-warning" aria-label={permissionLabel}>
             <Icon name="shield" className="h-3 w-3" />
           </span>
         </RowMarkTooltip>
       ) : null}
       {hasPendingForm ? (
         <RowMarkTooltip label={pendingFormLabel}>
-          <span className="inline-flex flex-shrink-0 items-center rounded bg-status-info/10 px-1 py-0.5 text-status-info" aria-label={pendingFormLabel}>
+          <span className="inline-flex flex-shrink-0 items-center text-status-warning" aria-label={pendingFormLabel}>
             <Icon name="question" className="h-3 w-3" />
           </span>
         </RowMarkTooltip>
@@ -1623,7 +1636,7 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
       pinnedMarker={isPinnedSession && !isSessionActionPending && !hidePinnedMarker ? pinnedMarkerContent : null}
       // No date: the list is ordered by recency and the row's tooltip carries
       // the time. A turn's duration shows while it runs and until it is read.
-      timeSlot={showActivityDuration
+      timeSlot={showActivityDuration && !waitingOnUser
         ? <SessionActivityDuration sessionId={session.id} running={isStreaming} className="typography-micro" />
         : null}
       // Project rows leave the action indicator to their worktree header.
@@ -1734,7 +1747,9 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
                 className={cn(
                   'group relative my-0.5 flex cursor-pointer items-center rounded-md pe-2.5',
                   !isTwoLineRow && 'gap-1.5',
-                  'py-1.5',
+                  // A one-line row is a little shorter than a two-line one's
+                  // padding: the list reads denser without the rows touching.
+                  isTwoLineRow ? 'py-1.5' : 'py-[5px]',
                   !(isActive || isRowSelected) && 'hover:bg-interactive-hover/60',
                   (isActive || isRowSelected) && 'bg-interactive-selection/70 text-interactive-selection-foreground',
                   isRowSelected && 'ring-1 ring-inset ring-border',
@@ -1876,6 +1891,7 @@ function SessionNodeItemComponent(props: SessionNodeItemProps): React.ReactNode 
             {showQuickArchiveAction ? (
               <QuickSessionAction
                 archiveLabel={t('sessions.sidebar.bulkActions.archive')}
+                shortcut={isCurrentSession ? archiveShortcut : undefined}
                 deleteLabel={t('sessions.sidebar.bulkActions.delete')}
                 buttonSizeClass={actionButtonSizeClass}
                 iconSizeClass={actionIconSizeClass}

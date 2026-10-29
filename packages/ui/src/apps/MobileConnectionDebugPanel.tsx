@@ -29,7 +29,7 @@ export const MobileConnectionDebugPanel: React.FC<{ onClose: () => void }> = ({ 
 
   return (
     <div className="fixed inset-0 z-[70] flex flex-col bg-background pb-[var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px))] pt-[var(--safe-area-inset-top,env(safe-area-inset-top,0px))] text-foreground">
-      <div className="flex items-center justify-between gap-2 border-b border-border/70 px-4 py-2.5">
+      <div className="flex items-center justify-between gap-2 border-b border-edge px-4 py-2.5">
         <h2 className="min-w-0 truncate typography-ui-label text-foreground">{t('mobile.connectionDebug.title')}</h2>
         <div className="flex shrink-0 items-center gap-1.5">
           <Button type="button" variant="outline" size="sm" onClick={handleCopy} disabled={entries.length === 0}>

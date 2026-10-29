@@ -87,7 +87,7 @@ const CHART_SERIES = {
     light: ['#2563eb', '#0d9488', '#7c3aed', '#db2777', '#65a30d'],
 } as const;
 
-const darkLift = (foreground: string) => `inset 0 1px 0 0 color-mix(in srgb,${foreground} 1.5%,transparent), 0 1px 1px 0 rgb(0 0 0 / 0.28), 0 2px 3px -2px rgb(0 0 0 / 0.2)`;
+const darkLift = (foreground: string) => `inset 0 0.5px 0 0 color-mix(in srgb,${foreground} 8%,transparent), 0 1px 2px 0 rgb(0 0 0 / 0.4)`;
 
 /**
  * The variables a page styles against. The names follow the shadcn
@@ -135,7 +135,7 @@ export function htmlRenderTheme(theme: Theme, metrics: HtmlRenderMetrics): HtmlR
             // shadow, plus a faint sheen in dark themes.
             '--oc-button-shadow': dark
                 ? `inset 0 1px 0 0 color-mix(in srgb,${surface.foreground} 6%,transparent), 0 1px 1px 0 rgb(0 0 0 / 0.31), 0 2px 5px -2px rgb(0 0 0 / 0.4)`
-                : 'inset 0 1px 0 0 rgb(255 255 255 / 0.45), 0 1px 2px 0 rgb(0 0 0 / 0.08)',
+                : 'inset 0 1px 0 0 rgb(255 255 255 / 0.2), 0 1px 1.5px 0 rgb(0 0 0 / 0.1)',
             '--oc-button-sheen': dark ? `linear-gradient(180deg,color-mix(in srgb,${surface.foreground} 1%,transparent),transparent 50%)` : 'none',
             // The destructive button (TINT_DESTRUCTIVE): the same light with
             // a fainter error tint, mixed into transparent in dark themes like
@@ -155,11 +155,13 @@ export function htmlRenderTheme(theme: Theme, metrics: HtmlRenderMetrics): HtmlR
             // into the page and a pill lifts on a short shadow; in dark themes
             // both take a lit top line, and a field's fill is washed halfway
             // toward the canvas so it sits a tone below the pills.
-            '--oc-edge': `color-mix(in srgb,${surface.foreground} ${dark ? 6 : 10}%,transparent)`,
+            '--oc-edge': `color-mix(in srgb,${surface.foreground} ${dark ? 14 : 16}%,transparent)`,
+            // Half a pixel at rest; a focused or invalid field takes a full one.
+            '--oc-edge-width': '0.5px',
             '--oc-field-bg': dark ? `color-mix(in srgb,${surface.background} 50%,${surface.elevated})` : surface.elevated,
             '--oc-field-lift': dark ? darkLift(surface.foreground) : 'inset 0 1px 2px 0 rgb(0 0 0 / 0.04)',
             '--oc-raised-bg': dark ? surface.elevated : surface.background,
-            '--oc-raised-lift': dark ? darkLift(surface.foreground) : '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+            '--oc-raised-lift': dark ? darkLift(surface.foreground) : '0 1px 1.5px 0 rgb(0 0 0 / 0.08)',
             '--oc-recessed': `inset 0 1px 2px 0 rgb(0 0 0 / ${dark ? 0.4 : 0.05})`,
             '--oc-hover': interactive.hover,
             '--oc-active': interactive.active,
@@ -203,9 +205,9 @@ const OPTION_CSS = '.oc-options{display:grid;gap:12px;grid-template-columns:repe
     + '.oc-button:disabled{opacity:.5;cursor:default;pointer-events:none}'
     // Two more of the app's Button variants: outline for a secondary action
     // (raised and neutral, canvas-coloured in light themes) and destructive.
-    + '.oc-button[data-variant=outline]{--oc-button-bg:var(--oc-raised-bg);--oc-button-hover:var(--oc-raised-bg);--oc-button-active:var(--oc-raised-bg);--oc-button-border:transparent;--oc-button-text:var(--card-foreground);--oc-button-shadow:inset 0 0 0 1px var(--oc-edge),var(--oc-raised-lift)}'
+    + '.oc-button[data-variant=outline]{--oc-button-bg:var(--oc-raised-bg);--oc-button-hover:var(--oc-raised-bg);--oc-button-active:var(--oc-raised-bg);--oc-button-border:transparent;--oc-button-text:var(--card-foreground);--oc-button-shadow:inset 0 0 0 0.5px var(--oc-edge),var(--oc-raised-lift)}'
     + '.oc-button[data-variant=outline]:hover,.oc-button[data-variant=outline]:focus-visible{background-image:linear-gradient(var(--oc-hover),var(--oc-hover))}'
-    + '.oc-button[data-variant=outline]:active{background-image:linear-gradient(var(--oc-active),var(--oc-active));box-shadow:inset 0 0 0 1px var(--oc-edge)}'
+    + '.oc-button[data-variant=outline]:active{background-image:linear-gradient(var(--oc-active),var(--oc-active));box-shadow:inset 0 0 0 0.5px var(--oc-edge)}'
     + '.oc-button[data-variant=destructive]{--oc-button-bg:var(--oc-destructive-bg);--oc-button-hover:var(--oc-destructive-hover);--oc-button-active:var(--oc-destructive-active);--oc-button-border:var(--oc-destructive-border);--oc-button-text:var(--oc-destructive-text)}'
     // Focus draws no ring in the app: a focused control takes its hover fill.
     + '.oc-option:focus-visible,.oc-button:focus-visible{outline:none}';
@@ -226,9 +228,9 @@ const KIT_CSS = '.oc-box{box-sizing:border-box;padding:16px;border-radius:var(--
     // The chat's own Markdown table (chat/markdown/MarkdownTable.tsx): a framed
     // block that scrolls sideways when wider than the column, rows apart by
     // a hairline.
-    + '.oc-table{overflow-x:auto;overscroll-behavior-x:none;border:1px solid color-mix(in srgb,var(--border) 80%,transparent);border-radius:calc(var(--oc-rem) * .5);background-color:var(--card)}'
+    + '.oc-table{overflow-x:auto;overscroll-behavior-x:none;border:1px solid color-mix(in srgb,var(--border) 70%,transparent);border-radius:calc(var(--oc-rem) * .5);background-color:var(--card)}'
     + '.oc-table table{width:100%;border-collapse:collapse}'
-    + '.oc-table th,.oc-table td{padding:.625em 1em;text-align:start;vertical-align:middle;border-bottom:1px solid color-mix(in srgb,var(--border) 60%,transparent)}'
+    + '.oc-table th,.oc-table td{padding:.625em 1em;text-align:start;vertical-align:middle;border-bottom:1px solid color-mix(in srgb,var(--border) 40%,transparent)}'
     + '.oc-table th{font-weight:600}.oc-table td{color:color-mix(in srgb,var(--foreground) 90%,transparent)}'
     + '.oc-table tr:last-child>td{border-bottom:0}.oc-table .oc-num{text-align:end}'
     + '.oc-badge{display:inline-flex;align-items:center;padding:.0625em .5em;border-radius:999px;background-color:color-mix(in srgb,var(--foreground) 6%,transparent);color:var(--muted-foreground);font-size:.8125em;font-weight:500;line-height:1.45;white-space:nowrap}'
@@ -241,11 +243,11 @@ const KIT_CSS = '.oc-box{box-sizing:border-box;padding:16px;border-radius:var(--
     // app's rem like .oc-button, its edge brightening on focus.
     + '.oc-field{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:calc(var(--oc-rem) * .8125);font-weight:500}'
     + '.oc-field .oc-muted{font-weight:400}'
-    + '.oc-input{box-sizing:border-box;width:100%;min-width:0;height:calc(var(--oc-rem) * 2);margin:0;padding:0 calc(var(--oc-rem) * .625);border:0;border-radius:calc(var(--oc-rem) * .4375);background-color:var(--oc-field-bg);box-shadow:inset 0 0 0 1px var(--oc-edge),var(--oc-field-lift);color:var(--card-foreground);font:inherit;font-size:calc(var(--oc-rem) * .84375);font-weight:400;line-height:1.45;outline:none;transition:background-color .15s}'
+    + '.oc-input{box-sizing:border-box;width:100%;min-width:0;height:calc(var(--oc-rem) * 2);margin:0;padding:0 calc(var(--oc-rem) * .625);border:0;border-radius:calc(var(--oc-rem) * .4375);background-color:var(--oc-field-bg);box-shadow:inset 0 0 0 var(--oc-edge-width) var(--oc-edge),var(--oc-field-lift);color:var(--card-foreground);font:inherit;font-size:calc(var(--oc-rem) * .84375);font-weight:400;line-height:1.45;outline:none;transition:background-color .15s}'
     + '.oc-input::placeholder{color:var(--muted-foreground)}'
     + '.oc-input:hover:not(:focus){background-image:linear-gradient(var(--oc-hover),var(--oc-hover))}'
-    + '.oc-input:focus{--oc-edge:color-mix(in srgb,var(--foreground) 26%,transparent)}'
-    + '.oc-input[aria-invalid=true]{--oc-edge:var(--destructive)}'
+    + '.oc-input:focus{--oc-edge:color-mix(in srgb,var(--foreground) 26%,transparent);--oc-edge-width:1px}'
+    + '.oc-input[aria-invalid=true]{--oc-edge:var(--destructive);--oc-edge-width:1px}'
     + '.oc-input:disabled{opacity:.5;cursor:default}'
     + 'textarea.oc-input{height:auto;min-height:calc(var(--oc-rem) * 4);padding:calc(var(--oc-rem) * .5) calc(var(--oc-rem) * .625);resize:vertical}'
     // A native select draws its own box in some engines, so it gets the

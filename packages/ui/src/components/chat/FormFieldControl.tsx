@@ -86,9 +86,9 @@ const AutoGrowTextarea = React.memo(function AutoGrowTextarea({
                 }}
                 onKeyDown={onKeyDown}
                 className={cn(
-                    'w-full resize-none rounded border border-border/30 bg-background/50 px-2 py-1',
+                    'w-full resize-none rounded border border-edge-muted bg-background/50 px-2 py-1',
                     'typography-meta text-foreground placeholder:text-muted-foreground',
-                    'focus:outline-none focus:border-border/60',
+                    'focus:outline-none focus:border-edge',
                     disabled ? 'opacity-60' : null,
                 )}
             />
@@ -171,8 +171,8 @@ return (
                         updateValue(field.key, { number: parsed !== null && Number.isFinite(parsed) ? parsed : null });
                     }}
                     className={cn(
-                        'w-full rounded border border-border/30 bg-background/50 px-2 py-1',
-                        'typography-meta text-foreground focus:outline-none focus:border-border/60',
+                        'w-full rounded border border-edge-muted bg-background/50 px-2 py-1',
+                        'typography-meta text-foreground focus:outline-none focus:border-edge',
                     )}
                 />
             ) : null}

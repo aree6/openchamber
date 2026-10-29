@@ -213,9 +213,12 @@ option that is on.
 ## Files toolbar
 
 The Files editor's row (`renderFileToolbar`, an `ActionToolbar`) has the actions
-the open file's type allows, the same in every mode: save state, the mode
-toggle, the source tools (find, go to line, symbols, line wrap, read aloud),
-the file's actions, and full screen. A tool the current mode cannot run opens
+the open file's type allows, the same in every mode. The row itself keeps save
+state, the mode toggle (and HTML annotation), find, comment on the file and
+full screen; go to line, symbols, line wrap, read aloud, the file's own actions
+(open in app, copy contents, copy path, download) and auto-save live in "More
+actions". With every action on the row it ran to a dozen icons, most of them
+rarely used (maintainer, 2026-10-28). A tool the current mode cannot run opens
 the source editor first: go to line from a preview switches to the editor and
 opens the field there. Find in a Markdown preview searches the preview. A
 read-only code file has no editor, so it gets no source tools. Go to line and
@@ -223,7 +226,7 @@ symbols close when a preview replaces the editor.
 
 Save state keeps one slot as wide as its widest text, also in previews, so
 saving moves nothing beside it; a canvas or draw.io preview puts its own save
-button there. Auto-save lives in "More actions" as a setting. HTML annotation
+button there. HTML annotation
 from the source switches to the preview and starts once the page has loaded.
 
 ## Large text files

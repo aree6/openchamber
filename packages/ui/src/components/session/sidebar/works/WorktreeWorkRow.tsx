@@ -146,7 +146,7 @@ export function WorktreeWorkRow(props: Props): React.ReactNode {
   const pinnedMark = pinned && !pinnedSectionShown ? (
     <RowMarkTooltip label={pinnedLabel}>
       <span className="inline-flex flex-shrink-0 items-center" aria-label={pinnedLabel}>
-        <Icon name="pushpin" className="h-3 w-3 text-primary" />
+        <Icon name="pushpin" className="h-3 w-3 text-muted-foreground" />
       </span>
     </RowMarkTooltip>
   ) : null;
@@ -461,7 +461,7 @@ export function WorktreeWorkRow(props: Props): React.ReactNode {
           // The same box as a session row in the same place: zone rows are a
           // little taller than tree rows.
           'group/work relative my-0.5 flex cursor-pointer select-none rounded-md pe-2.5',
-          'py-1.5',
+          detailed ? 'py-1.5' : 'py-[5px]',
           detailed ? 'flex-col gap-px' : 'items-center gap-1.5',
           selected ? 'bg-interactive-selection/70' : 'hover:bg-interactive-hover/60',
         )}

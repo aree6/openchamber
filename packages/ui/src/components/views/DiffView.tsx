@@ -145,7 +145,7 @@ const BRANCH_METADATA_MAX_ATTEMPTS = 3;
 const BinaryDiffPlaceholder = React.memo(() => {
     const { t } = useI18n();
     return (
-        <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+        <div className="rounded-lg border border-edge bg-background px-3 py-2">
             <div className="typography-meta text-muted-foreground">{t('diffView.binary.unavailable')}</div>
         </div>
     );
@@ -1384,7 +1384,7 @@ export const MultiFileDiffEntry = React.memo<MultiFileDiffEntryProps>(({
                 // instead of to the panel.
                 <div className="relative bg-background overflow-clip">
                     {!isMounted && !diffLoadFailure ? (
-                        <div className="h-40 border border-border/40 bg-background/40" />
+                        <div className="h-40 border border-edge-muted bg-background/40" />
                     ) : null}
                     {diffLoadFailure?.kind === 'unavailable' && diffLoadFailure.reason === 'nested_repository' ? (
                         <NestedRepositoryChanges
@@ -2892,8 +2892,8 @@ export const DiffView: React.FC<DiffViewProps> = ({
                     </>
                 )}
                 {showFileSidebar && !isTreeMode && (
-                    <section className="hidden lg:flex w-72 flex-col rounded-xl border border-border/60 bg-background/70 overflow-hidden">
-                        <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40">
+                    <section className="hidden lg:flex w-72 flex-col rounded-xl border border-edge bg-background/70 overflow-hidden">
+                        <div className="flex items-center justify-between px-3 py-1.5 border-b border-edge-muted">
                             <span className="typography-ui-header font-semibold text-foreground">{t('diffView.section.files')}</span>
                             <span className="typography-meta text-muted-foreground">{changedFiles.length}</span>
                         </div>

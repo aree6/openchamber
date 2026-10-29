@@ -303,6 +303,9 @@ mock.module('@/components/ui/dropdown-menu', () => ({
   DropdownMenuLabel: passthrough,
   DropdownMenuSeparator: () => null,
   DropdownMenuTrigger: passthrough,
+  DropdownMenuSub: passthrough,
+  DropdownMenuSubContent: passthrough,
+  DropdownMenuSubTrigger: passthrough,
 }));
 mock.module('@/components/ui/input', () => ({
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,

@@ -879,7 +879,7 @@ export const DirectoryExplorerDialog: React.FC<DirectoryExplorerDialogProps> = (
   );
 
   const resultsSection = (
-    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border/60 bg-[var(--surface-elevated)] shadow-sm">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-edge bg-[var(--surface-elevated)] shadow-sm">
       <ScrollableOverlay outerClassName="max-h-[min(28rem,58vh)]" className="p-2">
         <div className="px-2 pb-1 pt-0.5 typography-meta font-medium uppercase tracking-wide text-muted-foreground">
           {t('directoryExplorerDialog.browse.directories')}
@@ -953,7 +953,7 @@ export const DirectoryExplorerDialog: React.FC<DirectoryExplorerDialogProps> = (
                     <span className="truncate typography-ui-label text-foreground">{row.name}</span>
                   </span>
                   {row.type === 'directory' && row.added ? (
-                    <span className="rounded-full border border-border/60 px-2 py-0.5 typography-meta text-muted-foreground">
+                    <span className="rounded-full border border-edge px-2 py-0.5 typography-meta text-muted-foreground">
                       {t('directoryExplorerDialog.browse.addedBadge')}
                     </span>
                   ) : row.type === 'directory' && !isCloneMode ? (

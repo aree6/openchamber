@@ -6,6 +6,7 @@ import { Icon } from "@/components/icon/Icon";
 import { useI18n } from '@/lib/i18n';
 import { isInsideOpenPopup, isTopmostBackLayer, registerBackLayer } from '@/lib/mobileBackLayers';
 import { isIMECompositionEvent } from '@/lib/ime';
+import { useMobileChatInsets } from '@/lib/mobileChatInsets';
 
 interface MobileOverlayPanelProps {
   open: boolean;
@@ -45,6 +46,7 @@ export const MobileOverlayPanel: React.FC<MobileOverlayPanelProps> = ({
   renderHeader,
 }) => {
   const { t } = useI18n();
+  const chatInsets = useMobileChatInsets();
   const overlayRootRef = React.useRef<HTMLElement | null>(null);
   const [entered, setEntered] = React.useState(false);
   // True once the enter transition has finished. While entering, the panel's
@@ -147,13 +149,13 @@ export const MobileOverlayPanel: React.FC<MobileOverlayPanelProps> = ({
       // column's insets; on phones they are 0 and this is a no-op. The scrim
       // deliberately still covers everything.
       style={{
-        paddingLeft: 'var(--oc-chat-inset-left, 0px)',
-        paddingRight: 'var(--oc-chat-inset-right, 0px)',
+        paddingLeft: chatInsets.left,
+        paddingRight: chatInsets.right,
       }}
     >
         <div
           className={cn(
-            'oc-surface-elevated mt-auto flex max-h-[calc(100dvh-0.75rem)] min-h-0 w-full flex-col rounded-t-xl border-x border-t border-border/50 bg-surface-elevated shadow-none pwa-overlay-panel',
+            'oc-surface-elevated mt-auto flex max-h-[calc(100dvh-0.75rem)] min-h-0 w-full flex-col rounded-t-xl border-x border-t border-edge bg-surface-elevated shadow-none pwa-overlay-panel',
             'mx-auto max-w-lg',
             className
           )}
@@ -180,7 +182,7 @@ export const MobileOverlayPanel: React.FC<MobileOverlayPanelProps> = ({
           }
 
           return (
-            <div className="flex items-center justify-between px-3 py-2 border-b border-border/40">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-edge-muted">
               <h2 className="typography-ui-label font-semibold text-foreground">{title}</h2>
               {closeButton}
             </div>
@@ -199,7 +201,7 @@ export const MobileOverlayPanel: React.FC<MobileOverlayPanelProps> = ({
           {children}
         </ScrollableOverlay>
         {footer ? (
-          <div className="shrink-0 border-t border-border/40 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <div className="shrink-0 border-t border-edge-muted px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
             {footer}
           </div>
         ) : null}

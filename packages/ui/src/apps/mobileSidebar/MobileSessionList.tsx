@@ -7,6 +7,7 @@ import {
   grantGroupAccess,
   retryGroupStatus,
   toggleActivityZone,
+  toggleProjectsCaption,
 } from '@/components/session/sidebar/projects/sessionProjectListActions';
 import { SessionSidebarRows } from '@/components/session/sidebar/SessionSidebarRows';
 import type { SessionSidebarRow } from '@/components/session/sidebar/sessionSidebarRowModel';
@@ -17,7 +18,7 @@ import { useUIStore } from '@/stores/useUIStore';
 import { useSessionUIStore } from '@/sync/session-ui-store';
 import { useChildStoreManager } from '@/sync/sync-context';
 import { MobileSessionRow } from './MobileSessionRow';
-import { MobileFolderRow, MobileGroupHeader, MobileProjectHeader, MobileStatusRow, MobileZoneHeader } from './MobileSectionRows';
+import { MobileFolderRow, MobileGroupHeader, MobileProjectHeader, MobileProjectsCaption, MobileStatusRow, MobileZoneHeader } from './MobileSectionRows';
 import { MobileDraftRow, MobileRunRow, MobileWorktreeRow } from './MobileWorkRows';
 import { MOBILE_TREE_GEOMETRY } from './mobileSidebarGeometry';
 import { useMobileSidebarActions, useMobileSidebarRowsStore } from './mobileSidebarState';
@@ -104,6 +105,8 @@ export const MobileSessionList: React.FC<SessionProjectListProps> = ({ model, vi
     switch (row.kind) {
       case 'activity-header':
         return <MobileZoneHeader row={row} onToggle={() => toggleActivityZone(row, { model, actions })} />;
+      case 'caption':
+        return <MobileProjectsCaption row={row} onToggle={() => toggleProjectsCaption({ model })} />;
       case 'project-header': {
         const project = row.section.project;
         return <MobileProjectHeader

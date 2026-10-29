@@ -37,7 +37,7 @@ const commentLanguageContext = (knownSnippetTriggers: ReadonlySet<string>): Comp
     attachmentFilenames: [],
 });
 
-const MOBILE_COMMENT_RADIUS = '1.5rem';
+const MOBILE_COMMENT_RADIUS = '1.25rem';
 const MOBILE_COMMENT_MAX_LINES = 6;
 const FOOTER_ICON_BUTTON_CLASS = 'flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center text-foreground outline-none focus:outline-none';
 const FOOTER_PADDING_CLASS = 'px-1.5 py-1.5';
@@ -102,7 +102,10 @@ export function MobileCommentComposer({ draft, theme: currentTheme, handlers }: 
     return (
         <div
             data-mobile-comment-composer="true"
-            className="relative flex flex-col rounded-[1.5rem] border border-border/80 shadow-[0_4px_16px_-4px_rgb(0_0_0_/_0.12)]"
+            // Stands in for the composer while a comment is open; its height
+            // is not the composer's resting height (ChatContainer).
+            data-composer-transient=""
+            className="relative flex flex-col rounded-[1.25rem] border border-edge shadow-[0_4px_16px_-4px_rgb(0_0_0_/_0.12)]"
             style={{ backgroundColor: currentTheme?.colors?.surface?.subtle }}
         >
             <div className="flex items-center gap-2 ps-3.5 pe-1.5 pt-2">

@@ -165,7 +165,7 @@ const MobileBoardHeader: React.FC<{ onClose?: () => void; onBack?: () => void; c
     const { t } = useI18n();
     const action = onBack ?? onClose;
     return (
-        <header className="flex h-[var(--oc-header-height,56px)] shrink-0 items-center gap-2 border-b border-border/70 px-3">
+        <header className="flex h-[var(--oc-header-height,56px)] shrink-0 items-center gap-2 border-b border-edge px-3">
             {action ? (
                 <button
                     type="button"
@@ -301,7 +301,7 @@ const SourceBoard: React.FC<{ layout: SourceBoardLayout; onLeave?: () => void; o
                 {layout === 'mobile' ? (
                     <MobileBoardHeader onClose={onClose}>{projectScope}</MobileBoardHeader>
                 ) : (
-                    <div className="flex h-12 shrink-0 items-center gap-1 border-b border-border/60 px-2">{projectScope}</div>
+                    <div className="flex h-12 shrink-0 items-center gap-1 border-b border-edge px-2">{projectScope}</div>
                 )}
                 {repository.status === 'ready' && !trackersPending ? (
                     <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center typography-meta text-muted-foreground">
@@ -882,7 +882,7 @@ const SourceBoardBody: React.FC<{
                 ) : (
                     <>
                         <MobileBoardHeader onClose={onClose}>{scopePicker}</MobileBoardHeader>
-                        <div className="flex shrink-0 flex-col gap-2 border-b border-border/60 px-3 py-2">
+                        <div className="flex shrink-0 flex-col gap-2 border-b border-edge px-3 py-2">
                             {kindSwitch}
                             {search}
                         </div>
@@ -905,7 +905,7 @@ const SourceBoardBody: React.FC<{
     // follows the chosen name and would push the switch around.
     return (
         <div ref={boardRef} className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border/60 px-2 py-2.5">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-edge px-2 py-2.5">
                 {kindSwitch}
                 {scopePicker}
                 {narrow ? itemTrigger : null}
@@ -944,7 +944,7 @@ const SourceBoardBody: React.FC<{
                     onPointerDown={startResize}
                     onKeyDown={resizeWithKeys}
                     className={cn(
-                        'relative w-px shrink-0 cursor-col-resize bg-border/60',
+                        'relative w-px shrink-0 cursor-col-resize bg-edge',
                         "before:absolute before:inset-y-0 before:-inset-s-1.5 before:-inset-e-1.5 before:content-['']",
                         'hover:bg-interactive-selection focus-visible:bg-interactive-selection focus-visible:outline-none',
                         resizing && 'bg-interactive-selection',
